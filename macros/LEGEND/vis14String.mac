@@ -1,0 +1,393 @@
+# Management 
+/MG/manager/mglog routine #debugging #routine
+
+/MG/manager/seedWithUUID
+
+# Process List
+#/MG/processes/realm BBdecay
+#/MG/processes/lowenergy true
+#/MG/processes/GetStepLimit
+
+/MG/processes/opticalOnly true
+# Configure Detector
+/MG/geometry/detector LGND_200_14String
+/MG/L200/RadonShroudRadius 500 mm
+
+#/MG/geometry/WorldMaterial Vacuum 
+
+# Initialize Geant4 and geometry
+/run/initialize
+
+/vis/open HepRepFile
+/vis/verbose 4
+
+/vis/scene/create
+
+#/vis/scene/add/volume World
+/vis/scene/add/extent -300 300 -300 300 -300 300 cm
+/vis/scene/add/scale 1 m x 1 0 0 auto 1 1 0 m
+/vis/scene/add/scale 1 m y 0 1 0 auto 1 1 0 m
+
+/vis/scene/add/volume Cryostat_001
+#/vis/scene/add/volume airSpace
+
+/vis/scene/add/volume CopperShroud 
+/vis/scene/add/volume VM2000Shroud
+/vis/scene/add/volume TPBShroud
+
+/vis/scene/add/volume DetectorArray_001_StringAssembly_001_MiniShroudNylon_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_002_MiniShroudNylon_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_003_MiniShroudNylon_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_004_MiniShroudNylon_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_005_MiniShroudNylon_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_006_MiniShroudNylon_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_007_MiniShroudNylon_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_008_MiniShroudNylon_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_009_MiniShroudNylon_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_010_MiniShroudNylon_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_011_MiniShroudNylon_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_012_MiniShroudNylon_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_013_MiniShroudNylon_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_014_MiniShroudNylon_001
+
+/vis/scene/add/volume DetectorArray_001_StringAssembly_001_DetUnit_001_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_001_DetUnit_002_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_001_DetUnit_003_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_001_DetUnit_004_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_001_DetUnit_005_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_001_DetUnit_006_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_001_DetUnit_007_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_001_DetUnit_008_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_002_DetUnit_001_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_002_DetUnit_002_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_002_DetUnit_003_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_002_DetUnit_004_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_002_DetUnit_005_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_002_DetUnit_006_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_002_DetUnit_007_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_002_DetUnit_008_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_003_DetUnit_001_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_003_DetUnit_002_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_003_DetUnit_003_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_003_DetUnit_004_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_003_DetUnit_005_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_003_DetUnit_006_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_003_DetUnit_007_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_003_DetUnit_008_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_004_DetUnit_001_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_004_DetUnit_002_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_004_DetUnit_003_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_004_DetUnit_004_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_004_DetUnit_005_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_004_DetUnit_006_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_004_DetUnit_007_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_004_DetUnit_008_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_005_DetUnit_001_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_005_DetUnit_002_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_005_DetUnit_003_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_005_DetUnit_004_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_005_DetUnit_005_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_005_DetUnit_006_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_005_DetUnit_007_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_005_DetUnit_008_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_006_DetUnit_001_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_006_DetUnit_002_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_006_DetUnit_003_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_006_DetUnit_004_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_006_DetUnit_005_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_006_DetUnit_006_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_006_DetUnit_007_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_006_DetUnit_008_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_007_DetUnit_001_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_007_DetUnit_002_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_007_DetUnit_003_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_007_DetUnit_004_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_007_DetUnit_005_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_007_DetUnit_006_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_007_DetUnit_007_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_007_DetUnit_008_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_008_DetUnit_001_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_008_DetUnit_002_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_008_DetUnit_003_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_008_DetUnit_004_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_008_DetUnit_005_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_008_DetUnit_006_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_008_DetUnit_007_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_008_DetUnit_008_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_009_DetUnit_001_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_009_DetUnit_002_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_009_DetUnit_003_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_009_DetUnit_004_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_009_DetUnit_005_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_009_DetUnit_006_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_009_DetUnit_007_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_009_DetUnit_008_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_010_DetUnit_001_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_010_DetUnit_002_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_010_DetUnit_003_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_010_DetUnit_004_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_010_DetUnit_005_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_010_DetUnit_006_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_010_DetUnit_007_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_010_DetUnit_008_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_011_DetUnit_001_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_011_DetUnit_002_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_011_DetUnit_003_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_011_DetUnit_004_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_011_DetUnit_005_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_011_DetUnit_006_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_011_DetUnit_007_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_011_DetUnit_008_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_012_DetUnit_001_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_012_DetUnit_002_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_012_DetUnit_003_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_012_DetUnit_004_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_012_DetUnit_005_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_012_DetUnit_006_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_012_DetUnit_007_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_012_DetUnit_008_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_013_DetUnit_001_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_013_DetUnit_002_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_013_DetUnit_003_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_013_DetUnit_004_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_013_DetUnit_005_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_013_DetUnit_006_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_013_DetUnit_007_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_013_DetUnit_008_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_014_DetUnit_001_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_014_DetUnit_002_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_014_DetUnit_003_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_014_DetUnit_004_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_014_DetUnit_005_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_014_DetUnit_006_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_014_DetUnit_007_ActiveDet_001
+/vis/scene/add/volume DetectorArray_001_StringAssembly_014_DetUnit_008_ActiveDet_001
+
+/vis/scene/add/volume FiberArrayInner_FiberCore_0
+/vis/scene/add/volume FiberArrayInner_FiberCore_10
+/vis/scene/add/volume FiberArrayInner_FiberCore_20
+/vis/scene/add/volume FiberArrayInner_FiberCore_30
+/vis/scene/add/volume FiberArrayInner_FiberCore_40
+/vis/scene/add/volume FiberArrayInner_FiberCore_50
+/vis/scene/add/volume FiberArrayInner_FiberCore_60
+/vis/scene/add/volume FiberArrayInner_FiberCore_70
+/vis/scene/add/volume FiberArrayInner_FiberCore_80
+/vis/scene/add/volume FiberArrayInner_FiberCore_90
+/vis/scene/add/volume FiberArrayInner_FiberCore_100
+/vis/scene/add/volume FiberArrayInner_FiberCore_110
+/vis/scene/add/volume FiberArrayInner_FiberCore_120
+/vis/scene/add/volume FiberArrayInner_FiberCore_130
+/vis/scene/add/volume FiberArrayInner_FiberCore_140
+/vis/scene/add/volume FiberArrayInner_FiberCore_150
+/vis/scene/add/volume FiberArrayInner_FiberCore_160
+/vis/scene/add/volume FiberArrayInner_FiberCore_170
+/vis/scene/add/volume FiberArrayInner_FiberCore_180
+/vis/scene/add/volume FiberArrayInner_FiberCore_190
+/vis/scene/add/volume FiberArrayInner_FiberCore_200
+/vis/scene/add/volume FiberArrayInner_FiberCore_210
+/vis/scene/add/volume FiberArrayInner_FiberCore_220
+/vis/scene/add/volume FiberArrayInner_FiberCore_230
+/vis/scene/add/volume FiberArrayInner_FiberCore_240
+/vis/scene/add/volume FiberArrayInner_FiberCore_250
+/vis/scene/add/volume FiberArrayInner_FiberCore_260
+/vis/scene/add/volume FiberArrayInner_FiberCore_270
+/vis/scene/add/volume FiberArrayInner_FiberCore_280
+/vis/scene/add/volume FiberArrayInner_FiberCore_290
+/vis/scene/add/volume FiberArrayInner_FiberCore_300
+/vis/scene/add/volume FiberArrayInner_FiberCore_310
+/vis/scene/add/volume FiberArrayInner_FiberCore_320
+/vis/scene/add/volume FiberArrayInner_FiberCore_330
+/vis/scene/add/volume FiberArrayInner_FiberCore_340
+/vis/scene/add/volume FiberArrayInner_FiberCore_350
+/vis/scene/add/volume FiberArrayInner_FiberCore_360
+/vis/scene/add/volume FiberArrayInner_FiberCore_370
+/vis/scene/add/volume FiberArrayInner_FiberCore_380
+/vis/scene/add/volume FiberArrayInner_FiberCore_390
+/vis/scene/add/volume FiberArrayInner_FiberCore_400
+/vis/scene/add/volume FiberArrayInner_FiberCore_410
+/vis/scene/add/volume FiberArrayInner_FiberCore_420
+/vis/scene/add/volume FiberArrayInner_FiberCore_430
+/vis/scene/add/volume FiberArrayInner_FiberCore_440
+/vis/scene/add/volume FiberArrayInner_FiberCore_450
+/vis/scene/add/volume FiberArrayInner_FiberCore_460
+/vis/scene/add/volume FiberArrayInner_FiberCore_470
+/vis/scene/add/volume FiberArrayInner_FiberCore_480
+/vis/scene/add/volume FiberArrayInner_FiberCore_490
+/vis/scene/add/volume FiberArrayInner_FiberCore_500
+/vis/scene/add/volume FiberArrayInner_FiberCore_510
+/vis/scene/add/volume FiberArrayInner_FiberCore_520
+/vis/scene/add/volume FiberArrayInner_FiberCore_530
+/vis/scene/add/volume FiberArrayInner_FiberCore_540
+/vis/scene/add/volume FiberArrayInner_FiberCore_550
+/vis/scene/add/volume FiberArrayInner_FiberCore_560
+/vis/scene/add/volume FiberArrayInner_FiberCore_570
+/vis/scene/add/volume FiberArrayInner_FiberCore_580
+/vis/scene/add/volume FiberArrayInner_FiberCore_590
+/vis/scene/add/volume FiberArrayInner_FiberCore_600
+/vis/scene/add/volume FiberArrayInner_FiberCore_610
+/vis/scene/add/volume FiberArrayInner_FiberCore_620
+/vis/scene/add/volume FiberArrayInner_FiberCore_630
+/vis/scene/add/volume FiberArrayInner_FiberCore_640
+/vis/scene/add/volume FiberArrayInner_FiberCore_650
+/vis/scene/add/volume FiberArrayInner_FiberCore_660
+/vis/scene/add/volume FiberArrayInner_FiberCore_670
+/vis/scene/add/volume FiberArrayInner_FiberCore_680
+/vis/scene/add/volume FiberArrayInner_FiberCore_690
+/vis/scene/add/volume FiberArrayInner_FiberCore_700
+/vis/scene/add/volume FiberArrayInner_FiberCore_710
+/vis/scene/add/volume FiberArrayInner_FiberCore_720
+/vis/scene/add/volume FiberArrayInner_FiberCore_730
+/vis/scene/add/volume FiberArrayInner_FiberCore_740
+/vis/scene/add/volume FiberArrayInner_FiberCore_750
+/vis/scene/add/volume FiberArrayInner_FiberCore_760
+/vis/scene/add/volume FiberArrayInner_FiberCore_770
+
+
+/vis/scene/add/volume FiberArrayOuter_FiberCore_0
+/vis/scene/add/volume FiberArrayOuter_FiberCore_10
+/vis/scene/add/volume FiberArrayOuter_FiberCore_20
+/vis/scene/add/volume FiberArrayOuter_FiberCore_30
+/vis/scene/add/volume FiberArrayOuter_FiberCore_40
+/vis/scene/add/volume FiberArrayOuter_FiberCore_50
+/vis/scene/add/volume FiberArrayOuter_FiberCore_60
+/vis/scene/add/volume FiberArrayOuter_FiberCore_70
+/vis/scene/add/volume FiberArrayOuter_FiberCore_80
+/vis/scene/add/volume FiberArrayOuter_FiberCore_90
+/vis/scene/add/volume FiberArrayOuter_FiberCore_100
+/vis/scene/add/volume FiberArrayOuter_FiberCore_110
+/vis/scene/add/volume FiberArrayOuter_FiberCore_120
+/vis/scene/add/volume FiberArrayOuter_FiberCore_130
+/vis/scene/add/volume FiberArrayOuter_FiberCore_140
+/vis/scene/add/volume FiberArrayOuter_FiberCore_150
+/vis/scene/add/volume FiberArrayOuter_FiberCore_160
+/vis/scene/add/volume FiberArrayOuter_FiberCore_170
+/vis/scene/add/volume FiberArrayOuter_FiberCore_180
+/vis/scene/add/volume FiberArrayOuter_FiberCore_190
+/vis/scene/add/volume FiberArrayOuter_FiberCore_200
+/vis/scene/add/volume FiberArrayOuter_FiberCore_210
+/vis/scene/add/volume FiberArrayOuter_FiberCore_220
+/vis/scene/add/volume FiberArrayOuter_FiberCore_230
+/vis/scene/add/volume FiberArrayOuter_FiberCore_240
+/vis/scene/add/volume FiberArrayOuter_FiberCore_250
+/vis/scene/add/volume FiberArrayOuter_FiberCore_260
+/vis/scene/add/volume FiberArrayOuter_FiberCore_270
+/vis/scene/add/volume FiberArrayOuter_FiberCore_280
+/vis/scene/add/volume FiberArrayOuter_FiberCore_290
+/vis/scene/add/volume FiberArrayOuter_FiberCore_300
+/vis/scene/add/volume FiberArrayOuter_FiberCore_310
+/vis/scene/add/volume FiberArrayOuter_FiberCore_320
+/vis/scene/add/volume FiberArrayOuter_FiberCore_330
+/vis/scene/add/volume FiberArrayOuter_FiberCore_340
+/vis/scene/add/volume FiberArrayOuter_FiberCore_350
+/vis/scene/add/volume FiberArrayOuter_FiberCore_360
+/vis/scene/add/volume FiberArrayOuter_FiberCore_370
+/vis/scene/add/volume FiberArrayOuter_FiberCore_380
+/vis/scene/add/volume FiberArrayOuter_FiberCore_390
+/vis/scene/add/volume FiberArrayOuter_FiberCore_400
+/vis/scene/add/volume FiberArrayOuter_FiberCore_410
+/vis/scene/add/volume FiberArrayOuter_FiberCore_420
+/vis/scene/add/volume FiberArrayOuter_FiberCore_430
+/vis/scene/add/volume FiberArrayOuter_FiberCore_440
+/vis/scene/add/volume FiberArrayOuter_FiberCore_450
+/vis/scene/add/volume FiberArrayOuter_FiberCore_460
+/vis/scene/add/volume FiberArrayOuter_FiberCore_470
+/vis/scene/add/volume FiberArrayOuter_FiberCore_480
+/vis/scene/add/volume FiberArrayOuter_FiberCore_490
+/vis/scene/add/volume FiberArrayOuter_FiberCore_500
+/vis/scene/add/volume FiberArrayOuter_FiberCore_510
+/vis/scene/add/volume FiberArrayOuter_FiberCore_520
+/vis/scene/add/volume FiberArrayOuter_FiberCore_530
+/vis/scene/add/volume FiberArrayOuter_FiberCore_540
+/vis/scene/add/volume FiberArrayOuter_FiberCore_550
+/vis/scene/add/volume FiberArrayOuter_FiberCore_560
+/vis/scene/add/volume FiberArrayOuter_FiberCore_570
+/vis/scene/add/volume FiberArrayOuter_FiberCore_580
+/vis/scene/add/volume FiberArrayOuter_FiberCore_590
+/vis/scene/add/volume FiberArrayOuter_FiberCore_600
+/vis/scene/add/volume FiberArrayOuter_FiberCore_610
+/vis/scene/add/volume FiberArrayOuter_FiberCore_620
+/vis/scene/add/volume FiberArrayOuter_FiberCore_630
+/vis/scene/add/volume FiberArrayOuter_FiberCore_640
+/vis/scene/add/volume FiberArrayOuter_FiberCore_650
+/vis/scene/add/volume FiberArrayOuter_FiberCore_660
+/vis/scene/add/volume FiberArrayOuter_FiberCore_670
+/vis/scene/add/volume FiberArrayOuter_FiberCore_680
+/vis/scene/add/volume FiberArrayOuter_FiberCore_690
+/vis/scene/add/volume FiberArrayOuter_FiberCore_700
+/vis/scene/add/volume FiberArrayOuter_FiberCore_710
+/vis/scene/add/volume FiberArrayOuter_FiberCore_720
+/vis/scene/add/volume FiberArrayOuter_FiberCore_730
+/vis/scene/add/volume FiberArrayOuter_FiberCore_740
+/vis/scene/add/volume FiberArrayOuter_FiberCore_750
+/vis/scene/add/volume FiberArrayOuter_FiberCore_760
+/vis/scene/add/volume FiberArrayOuter_FiberCore_770
+/vis/scene/add/volume FiberArrayOuter_FiberCore_780
+/vis/scene/add/volume FiberArrayOuter_FiberCore_790
+/vis/scene/add/volume FiberArrayOuter_FiberCore_800
+/vis/scene/add/volume FiberArrayOuter_FiberCore_810
+/vis/scene/add/volume FiberArrayOuter_FiberCore_820
+/vis/scene/add/volume FiberArrayOuter_FiberCore_830
+/vis/scene/add/volume FiberArrayOuter_FiberCore_840
+/vis/scene/add/volume FiberArrayOuter_FiberCore_850
+/vis/scene/add/volume FiberArrayOuter_FiberCore_860
+/vis/scene/add/volume FiberArrayOuter_FiberCore_870
+/vis/scene/add/volume FiberArrayOuter_FiberCore_880
+/vis/scene/add/volume FiberArrayOuter_FiberCore_890
+/vis/scene/add/volume FiberArrayOuter_FiberCore_900
+/vis/scene/add/volume FiberArrayOuter_FiberCore_910
+/vis/scene/add/volume FiberArrayOuter_FiberCore_920
+/vis/scene/add/volume FiberArrayOuter_FiberCore_930
+/vis/scene/add/volume FiberArrayOuter_FiberCore_940
+/vis/scene/add/volume FiberArrayOuter_FiberCore_950
+/vis/scene/add/volume FiberArrayOuter_FiberCore_960
+/vis/scene/add/volume FiberArrayOuter_FiberCore_970
+/vis/scene/add/volume FiberArrayOuter_FiberCore_980
+/vis/scene/add/volume FiberArrayOuter_FiberCore_990
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1000
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1010
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1020
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1030
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1040
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1050
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1060
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1070
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1080
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1090
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1100
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1110
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1120
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1130
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1140
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1150
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1160
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1170
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1180
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1190
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1200
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1210
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1220
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1230
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1240
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1250
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1260
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1270
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1280
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1290
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1300
+/vis/scene/add/volume FiberArrayOuter_FiberCore_1310
+
+/vis/sceneHandler/attach
+/vis/scene/add/trajectories
+/vis/scene/add/hits
+
+/tracking/storeTrajectory 0
+
+/vis/viewer/flush
+/vis/viewer/update
+/vis/viewer/set/style wireframe
+#/vis/viewer/set/style surface
+/vis/viewer/set/projection perspective 45 deg
+/vis/viewer/set/lightsMove cam
+
+/vis/drawVolume
+

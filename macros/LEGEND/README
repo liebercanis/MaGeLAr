@@ -1,0 +1,7 @@
+In order to generate optical heat map,
+use optical_array.C script
+This script generated 340 macros which are slixces in Z
+The script can be should be reviewed before generating
+use:
+g++ -std=c++11 optical_array.C -o optical_array
+./optical_array

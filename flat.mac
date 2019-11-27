@@ -1,0 +1,58 @@
+# ==================================== #
+# Runs detector with phase II geometry #
+# ==================================== #
+# 
+# The first line sets the verbosity level
+/MG/manager/mglog  trace 
+/MG/manager/seedWithUUID
+#
+# Process List
+/MG/processes/realm DarkMatter
+/MG/processes/lowenergy true 
+#/MG/processes/useNoHadPhysics true
+/MG/processes/optical true
+#/MG/processes/opticalOnly true  
+
+# Configure Detector
+/MG/geometry/detector LGND_200_14String
+/MG/L200/RadonShroudRadius 700 mm
+/MG/L200/SetSensitiveVolumeSiPM true 
+#/MG/L200/SetSensitiveVolumeArgon true
+/MG/L200/SetSensitiveVolumeGermanium false
+
+# Initialize Geant4 and geometry
+/run/initialize
+/MG/eventaction/rootschema MCOpticalRun
+/MG/eventaction/reportingfrequency 1
+
+/MG/eventaction/rootfilename flat.root
+/MG/io/MCOpticalRun/SetSensitiveIDLabelScheme askGeom
+/MG/io/MCOpticalRun/setRunID 001
+/MG/io/MCOpticalRun/useTimeWindow true
+/MG/io/MCOpticalRun/setTimeWindow 86400 second
+/MG/io/MCOpticalRun/setNSteps 10000000000000
+/MG/io/MCOpticalRun/setWriteAllSteps
+#/MG/io/MCOpticalRun/setWriteAllStepsInEventsThatDepositEnergy true
+#/MG/io/MCOpticalRun/KillAll true
+
+#
+# Here set the energy sampling from ar39.dat
+#
+/MG/generator/select G4gun
+/MG/generator/g4gun/spectrum_from_file true
+/MG/generator/g4gun/spectrum_filename flat.dat
+/gun/position 0 0 0 m
+#/gun/direction 0 0 1 
+/MG/generator/g4gun/cone_on true
+/gun/particle  e- 
+/run/beamOn 10
+
+
+
+
+
+
+
+ 
+
+

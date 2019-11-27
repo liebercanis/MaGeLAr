@@ -1,0 +1,39 @@
+# build gerda geometry
+/control/execute load-phaseII.mac
+
+/run/initialize
+
+# open viewer. Other options: DAWNFILE, HepRep, HepRepXML, RayTracer, RaytracerX ...
+/vis/open HepRepXML
+/vis/scene/create
+
+# /vis/scene/add/trajectories # add trajectories?
+# /vis/scene/add/hits         # add hits?
+
+# add here the volumes to draw (commands stored in auxiliary files)
+# /control/execute ge.mac
+# /control/execute ms.mac
+# /control/execute holder.mac
+/control/execute cables.mac
+# /control/execute lar.mac
+# /control/execute other.mac
+
+# /vis/scene/add/axes
+/vis/sceneHandler/attach
+/vis/viewer/flush # or flush for DAWNFILE or HepRep
+
+# shoot a geantino
+# /tracking/verbose 1
+# /MG/generator/select              G4gun
+# /MG/generator/g4gun/cone_on       true
+# /MG/generator/g4gun/coneDirection 1 0 0
+# /MG/generator/g4gun/thetaDelta    0 deg
+# /gun/particle geantino
+# /gun/position -100 234.495 0 mm
+# /gun/energy   1 MeV
+# /run/beamOn 1
+
+# you can now customize your view, check the official docs
+# https://geant4.web.cern.ch/geant4/UserDocumentation/UsersGuides/ForApplicationDeveloper/html/ch08s04.html
+/vis/viewer/set/viewpointThetaPhi 120 -90
+/vis/viewer/set/style surface

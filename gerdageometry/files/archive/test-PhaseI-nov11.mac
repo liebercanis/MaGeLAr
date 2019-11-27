@@ -1,0 +1,48 @@
+/tracking/verbose                               0
+/MG/manager/mglog                               trace
+/MG/manager/heprandomseed                       123
+/MG/processes/realm                             BBdecay
+/MG/processes/lowenergy                         true
+/MG/processes/useNoHadPhysics                   true
+/MG/geometry/detector                           GerdaArray
+/MG/geometry/database                           false
+/MG/geometry/detector/general/depth             46.5 cm
+/MG/geometry/lock/type                          CommLock4
+/MG/geometry/detector/geometryfile              geometry.json
+/MG/geometry/detector/matrixfile                matrix-PhaseI-nov11.json
+/MG/geometry/detector/individualzposofdetectors false
+/MG/geometry/cherenkov                          -1
+/MG/eventaction/rootschema                      GerdaArray
+/MG/eventaction/rootfilename                    test-PhaseI-nov11.root
+/MG/output/saveOnlyEventsWithEnergyDeposit      true
+
+/run/initialize
+
+/MG/generator/confine                           volumearray
+/MG/generator/volumearrayadd                    CrystalDeadLayer_geometry1_0
+/MG/generator/volumearrayadd                    Crystal_geometry1_0
+/MG/generator/volumearrayadd                    CrystalDeadLayer_geometry1_1
+/MG/generator/volumearrayadd                    Crystal_geometry1_1
+/MG/generator/volumearrayadd                    CrystalDeadLayer_geometry1_2
+/MG/generator/volumearrayadd                    Crystal_geometry1_2
+/MG/generator/volumearrayadd                    CrystalDeadLayer_geometry1_3
+/MG/generator/volumearrayadd                    Crystal_geometry1_3
+/MG/generator/volumearrayadd                    CrystalDeadLayer_geometry1_4
+/MG/generator/volumearrayadd                    Crystal_geometry1_4
+/MG/generator/volumearrayadd                    CrystalDeadLayer_geometry1_5
+/MG/generator/volumearrayadd                    Crystal_geometry1_5
+/MG/generator/volumearrayadd                    CrystalDeadLayer_geometry1_6
+/MG/generator/volumearrayadd                    Crystal_geometry1_6
+/MG/generator/volumearrayadd                    CrystalDeadLayer_geometry1_7
+/MG/generator/volumearrayadd                    Crystal_geometry1_7
+/MG/generator/volumearrayadd                    CrystalDeadLayer_geometry1_8
+/MG/generator/volumearrayadd                    Crystal_geometry1_8
+/MG/generator/volumearrayadd                    CrystalDeadLayer_geometry1_9
+/MG/generator/volumearrayadd                    Crystal_geometry1_9
+/MG/generator/volumearrayadd                    CrystalDeadLayer_geometry1_10
+/MG/generator/volumearrayadd                    Crystal_geometry1_10
+
+/MG/generator/select                            G4gun
+/gun/particle                                   geantino
+
+/run/beamOn                                     1

@@ -1,0 +1,43 @@
+# Management 
+/MG/manager/mglog routine
+/MG/manager/seedWithUUID
+
+# Process List
+/MG/processes/realm BBdecay
+/MG/processes/lowenergy true
+
+# Configure Detector
+#/MG/geometry/detector LGND_200_Baseline
+/MG/geometry/detector LGND_200_14String
+/MG/L200/CalibrationOn true
+/MG/L200/CalibrationSetSourceNumber 33
+/MG/L200/CalibrationSetSourceHeight -500 mm
+/MG/L200/CalibrationSetAbsorber false
+
+/MG/geometry/WorldMaterial Vacuum 
+
+# Initialize Geant4 and geometry
+/run/initialize
+
+/MG/eventaction/rootschema MCRun
+/MG/eventaction/rootfilename Source_test.root
+
+/vis/open HepRepFile
+
+/vis/scene/create
+/vis/drawVolume
+
+/vis/sceneHandler/attach
+/vis/scene/add/trajectories
+/vis/scene/add/hits
+/vis/scene/endOfEventAction accumulate
+
+/vis/viewer/flush
+#/vis/viewer/update
+
+
+/MG/generator/select LGND200Calibration
+/MG/generator/LGND200Calibration/setZ 90
+/MG/generator/LGND200Calibration/setA 228
+/run/beamOn 20
+

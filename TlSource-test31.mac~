@@ -1,0 +1,21 @@
+/MG/manager/mglog debugging 
+/MG/manager/seedWithUUID
+/MG/processes/realm BBdecay
+/MG/processes/lowenergy true
+/MG/geometry/detector LGND_200_14String
+/MG/eventaction/reportingfrequency 10000
+/MG/L200/CalibrationOn true
+/MG/L200/CalibrationSetSourceNumber  31 
+/MG/L200/CalibrationSetSourceHeight 500 mm #0 # -500 mm
+/MG/L200/CalibrationSetAbsorber true 
+/MG/L200/SetSensitiveVolumeArgon true 
+/MG/L200/SetSensitiveVolumeGermanium true
+/MG/eventaction/rootschema MCRun
+/MG/io/MCRun/SetSensitiveIDLabelScheme askGeom
+/MG/eventaction/rootfilename TlSource-test31.root 
+/MG/eventaction/reportingfrequency 1000
+/MG/generator/select LGND200Calibration
+/MG/generator/LGND200Calibration/setZ 81
+/MG/generator/LGND200Calibration/setA 208
+/run/initialize 
+/run/beamOn 10
