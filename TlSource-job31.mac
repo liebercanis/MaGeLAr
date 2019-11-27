@@ -18,4 +18,4 @@
 /MG/generator/LGND200Calibration/setZ 81
 /MG/generator/LGND200Calibration/setA 208
 /run/initialize 
-/run/beamOn 500000
+/run/beamOn 50000

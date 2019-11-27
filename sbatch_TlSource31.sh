@@ -13,8 +13,8 @@
 #SBATCH --mem=32G
 #SBATCH --image=docker:legendexp/legend-base:latest
 #SBATCH --export=LD_LIBRARY_PATH=/global/project/projectdirs/m2676/users/mgold/shifter/MGDO/lib:/opt/root/lib:/usr/lib64:/opt/clhep/lib:/opt/geant4/lib64:/opt/geant4/lib64:/opt/clhep/lib:/opt/hdf5/lib
-#SBATCH --export=projectdir=/global/project/projectdirs/m2676/users/mgold/shifter/MaGe
+#SBATCH --export=projectdir=/global/project/projectdirs/m2676/users/mgold/shifter/MaGeLAr
 
-export projectdir=/global/project/projectdirs/m2676/users/mgold/shifter/MaGe
-echo "srun --output=$projectdir/TlSource-job31.log -n 1  -C haswell shifter --env-file=$projectdir/MaGeEnvirons $projectdir/bin/MaGe $projectdir/TlSource-job31.mac"
-srun --output=$projectdir/TlSource-job31.log -n 1  -C haswell shifter --env-file=$projectdir/MaGeEnvirons $projectdir/bin/MaGe $projectdir/TlSource-job31.mac
+export projectdir=/global/project/projectdirs/m2676/users/mgold/shifter/MaGeLAr
+echo "srun --output=$projectdir/TlSource-job31.log -n 1  -C haswell shifter --env-file=$projectdir/MaGeEnvirons $projectdir/bin/Linux-g++/MaGe $projectdir/TlSource-job31.mac"
+srun --output=$projectdir/TlSource-job31.log -n 1  -C haswell shifter --env-file=$projectdir/MaGeEnvirons $projectdir/bin/Linux-g++/MaGe $projectdir/TlSource-job31.mac
