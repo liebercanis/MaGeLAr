@@ -658,7 +658,7 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
     lArEvent.Energy += eDep;
     int bin = hMap->FindBin(position.x(), position.y(), position.z());
     lArEvent.PE += hMap->GetBinContent(bin)*scintYield*SiPMQE;
-     MGLog(routine) << "LAREVENT " << physVolName << " " << eDep << " sum " << lArEvent.Energy << " pe " <<lArEvent.PE << endlog;
+     //MGLog(routine) << "LAREVENT " << physVolName << " " << eDep << " sum " << lArEvent.Energy << " pe " <<lArEvent.PE << endlog;
   }
 
   fMCEventSteps->AddStep( 
