@@ -8,18 +8,19 @@ import pprint
 
 
 def main(args):
-    if len(args)==0: 
-        print(' enter valid number 1,2,or 3 ')
+    if len(args)<2: 
+        print(' enter valid number 1,2,or 3  followd by tag ')
         exit(0)
 
-    jobn = int(args[0]) 
+    jobn = int(args[0])     
+    tag = args[1]     
     if (jobn<1 or jobn>3) :
         print(' enter valid number 1,2,or 3 ')
         exit(0)
 
     jobn = jobn+30
-    macroname = 'TlSource-job%i.mac' % jobn
-    outputname = 'TlSource-job%i.root' % jobn
+    macroname = 'TlSource-job%i%s.mac' % (jobn,tag) 
+    outputname = 'TlSource-job%i%s.root' % (jobn,tag)
     print(macroname,' ',outputname)
     exists = os.path.isfile(macroname)
     if exists:

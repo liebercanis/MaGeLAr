@@ -507,7 +507,7 @@ void MGOutputMCRun::DefineSchema()
 
   if(fATree == NULL) {
     fATree = new TTree("ATree"," liquid argon veto ");
-    fATree->Branch("lArEvent",&lArEvent,"energy/D:PE/D");
+    fATree->Branch("lArEvent",&lArEvent,"energy/D:PE/D:x/D:y/D:z/D");
     MGLog(routine) << " ATree created " << endlog;    
   }
 
@@ -658,6 +658,9 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
     lArEvent.Energy += eDep;
     int bin = hMap->FindBin(position.x(), position.y(), position.z());
     lArEvent.PE += hMap->GetBinContent(bin)*scintYield*SiPMQE;
+    lArEvent.x = position.x();
+    lArEvent.y = position.y();
+    lArEvent.z = position.z();
      //MGLog(routine) << "LAREVENT " << physVolName << " " << eDep << " sum " << lArEvent.Energy << " pe " <<lArEvent.PE << endlog;
   }
 

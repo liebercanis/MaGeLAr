@@ -185,6 +185,9 @@ private:
   struct lArEvent_t {
     double Energy;
     double PE;
+    double x;
+    double y;
+    double z;
   };
   lArEvent_t lArEvent;
 
