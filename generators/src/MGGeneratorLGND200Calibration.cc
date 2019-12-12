@@ -53,7 +53,6 @@
 #include "G4RandomDirection.hh"
 #include "G4ParticleGun.hh"
 #include "G4ParticleDefinition.hh"
-#include "G4IonTable.hh"
 #include "G4Run.hh"
 #include "G4ThreeVector.hh"
 #include "G4UImanager.hh"
@@ -79,6 +78,8 @@ MGGeneratorLGND200Calibration::MGGeneratorLGND200Calibration()
 	fA = 228;
 	fZ = 90;
   fGeneratorName = "LGND200Calibration";
+  theIonTable = (G4IonTable*)(G4ParticleTable::GetParticleTable()->GetIonTable());
+  
   fG4Messenger = new MGGeneratorLGND200CalibrationMessenger(this);
   fParticleGun = new G4ParticleGun(1);
 
@@ -86,20 +87,7 @@ MGGeneratorLGND200Calibration::MGGeneratorLGND200Calibration()
 	//defaults
 	fSourcePosition = new G4ThreeVector(0,0,0);
 
-	//get position of the inner gold volume
-  G4PhysicalVolumeStore* volumeStore = G4PhysicalVolumeStore::GetInstance();
-  G4int nVolumes = (G4int) volumeStore->size();
-  G4String candidateList;
-  for(G4int i=0;i<nVolumes;i++) {
-    candidateList = (*volumeStore)[i]->GetName();
-		if(candidateList.contains("LGND_200_CalibrationSourceInner")){
-			fSourcePosition->setX((*volumeStore)[i]->GetTranslation().getX());
-			fSourcePosition->setY((*volumeStore)[i]->GetTranslation().getY());
-			fSourcePosition->setZ((*volumeStore)[i]->GetTranslation().getZ());
-			break;				
-		}
-  }
-
+	
 }
 
 //---------------------------------------------------------------------------//
@@ -126,10 +114,24 @@ void MGGeneratorLGND200Calibration::BeginOfRunAction(G4Run const*)
 
 void MGGeneratorLGND200Calibration::Dump()
 {
-  MGLog(routine) << "-------------------------------------------" << endlog;
+  //get position of the inner gold volume
+  G4PhysicalVolumeStore* volumeStore = G4PhysicalVolumeStore::GetInstance();
+  G4int nVolumes = (G4int) volumeStore->size();
+  G4String candidateList("NONE");
+  for(G4int i=0;i<nVolumes;i++) {
+    candidateList = (*volumeStore)[i]->GetName();
+		if(candidateList.contains("LGND_200_CalibrationSourceInner")){
+			fSourcePosition->setX((*volumeStore)[i]->GetTranslation().getX());
+			fSourcePosition->setY((*volumeStore)[i]->GetTranslation().getY());
+			fSourcePosition->setZ((*volumeStore)[i]->GetTranslation().getZ());
+			break;				
+		}
+  }
+  MGLog(routine) << "---------  using source position from volume " << candidateList << "-----------------"  << endlog; 
+  
+  const G4String particleName = theIonTable->GetIon(fZ, fA)->GetParticleName();
   MGLog(routine) << "  LGND200 Calibration Source Parameters:" << endlog;
-  MGLog(routine) << "  Ion Z: " << fZ << endlog;
-  MGLog(routine) << "  Ion A: " << fA << endlog;
+  MGLog(routine) << "  Ion  " << particleName << " A " << fA << " Z " << fZ << endlog;
 	MGLog(routine) << "  Source X " << fSourcePosition->x()/CLHEP::mm << " mm " << endlog;
 	MGLog(routine) << "  Source Y " << fSourcePosition->y()/CLHEP::mm << " mm " << endlog;
 	MGLog(routine) << "  Source Z " << fSourcePosition->z()/CLHEP::mm << " mm " << endlog;
@@ -162,8 +164,6 @@ void MGGeneratorLGND200Calibration::GeneratePrimaryVertex(G4Event *event)
 	fStartPosition.setY(fSourcePosition->y() + yvalue);		
 	fStartPosition.setZ(fSourcePosition->z() + zvalue);
 
-  G4IonTable *theIonTable =
-    (G4IonTable*)(G4ParticleTable::GetParticleTable()->GetIonTable());
   G4ParticleDefinition *aIon = theIonTable->GetIon(fZ, fA);
   fParticleGun->SetParticleDefinition(aIon);
   fParticleGun->SetParticleMomentumDirection(G4RandomDirection());
