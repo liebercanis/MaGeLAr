@@ -193,7 +193,7 @@ void MGOutputMCRun::BeginOfEventAction(const G4Event *event)
         << "track IDs of primary particles will be screwed up!" << endlog;
       }
       int trackID = ++iTrackCounter;
-      MGLog(routine) << "***** Primary  " << iParticle << " ID  " << particleID 
+      MGLog(debugging) << "***** Primary  " << iParticle << " ID  " << particleID 
         <<  " track ID " << trackID 
         <<  " primary track ID " << primaryParticle->GetTrackID() 
         << " primary code " << primaryParticle->GetPDGcode() 
@@ -528,7 +528,7 @@ void MGOutputMCRun::DefineSchema()
 
 void MGOutputMCRun::EndOfEventAction(const G4Event* )
 {
-  printlArEvent();
+  //printlArEvent();
   WriteEvent();
   fOffsetTime = 0.0;
 }
@@ -583,7 +583,7 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
   double stepLength = step->GetStepLength();
   double totalTrackLength = track->GetTrackLength();
   int stepIndex = fMCEventSteps->GetNSteps();
-  MGLog(routine) << "***** step particle index " << stepIndex << "  ID  " << pid << " track " << trackID 
+  MGLog(debugging) << "***** step particle index " << stepIndex << "  ID  " << pid << " track " << trackID 
       << " parent " << parentTrackID << " first " << firstDecay  
       << " process " << processName << "  " << physVolName << endlog;
 
