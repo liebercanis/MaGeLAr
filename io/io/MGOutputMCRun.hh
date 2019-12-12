@@ -29,6 +29,7 @@
 #include "TH3D.h"
 #include "TH2D.h"
 
+#include "io/MGLogger.hh"
 #include "io/MGOutputRoot.hh"
 #include "MGTMCEventHeader.hh"
 #include "MGTMCEventSteps.hh"
@@ -174,20 +175,62 @@ public:
   /// Return whether particle is a germanium nucleus.
   static bool MaGeParticleIDIsGeNucleus(int pid);
 
+  void lArEventZero() {
+    lArEvent.ev=0;
+    lArEvent.edep=0;
+    lArEvent.PE=0; 
+    lArEvent.PVx=0; 
+    lArEvent.PVy=0; 
+    lArEvent.PVz=0; 
+    lArEvent.id=0;    
+    lArEvent.e0=0; 
+    lArEvent.x0=0; 
+    lArEvent.y0=0; 
+    lArEvent.z0=0;    
+    lArEvent.xf=0; 
+    lArEvent.yf=0; 
+    lArEvent.zf=0;    
+  }
+
+  void printlArEvent() {
+    TString mess;
+    mess.Form(" ***** lArEvent %i  ****  (%.1f,%.1f,%.1f)",lArEvent.ev,lArEvent.PVx,lArEvent.PVy,lArEvent.PVz);
+    MGLog(routine) << mess << endlog;
+    mess.Form(" pid %i e0 %.3f first (%.1f,%.1f,%.1f) last (%.1f,%.1f,%.1f) " ,lArEvent.id,lArEvent.e0,
+        lArEvent.x0,lArEvent.y0,lArEvent.z0,lArEvent.xf,lArEvent.yf,lArEvent.zf);
+    MGLog(routine) << mess << endlog;
+    mess.Form(" edep %.3f PE %.3f",lArEvent.edep,lArEvent.PE);
+    MGLog(routine) << mess << endlog;
+  }
+
 
 private:
   MGTMCRun          *fMCRun;             // MGDO encapsulation of run-level info 
   MGTMCEventHeader  *fMCEventHeader;     // MGDO encapsulation of event-level info
   MGTMCEventSteps   *fMCEventSteps;      // MGDO encapsulation of steps 
-  MGTMCEventSteps   *fMCEventPrimaries;  // MGDO encapsulation of steps 
+  MGTMCEventSteps   *fMCEventPrimaries;  // MGDO encapsulation of steps
 
-  // for LAr
+  G4bool firstDecay;
+
+  /* for LAr
+  *** If the address points to more than one numerical variable, 
+  *** we strongly recommend that the variable be sorted in decreasing order of size. 
+  */
   struct lArEvent_t {
-    double Energy;
+    double edep;
     double PE;
-    double x;
-    double y;
-    double z;
+    double PVx;
+    double PVy;
+    double PVz;
+    double e0;
+    double x0;
+    double y0;
+    double z0;
+    double xf;
+    double yf;
+    double zf;
+    int ev;
+    int id;
   };
   lArEvent_t lArEvent;
 

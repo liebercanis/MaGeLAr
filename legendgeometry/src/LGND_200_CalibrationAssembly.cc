@@ -45,7 +45,6 @@
  */
 //---------------------------------------------------------------------------//
 //
-
 #include "G4LogicalVolume.hh"	
 #include "G4Material.hh"
 #include "G4VisAttributes.hh"
@@ -66,8 +65,8 @@ using namespace CLHEP;
 
 //---------------------------------------------------------------------------//
 
-LGND_200_CalibrationAssembly::LGND_200_CalibrationAssembly(G4String fName, G4String serialNumber) :
-  LGND_Assembly(fName, serialNumber, "Calibration")
+LGND_200_CalibrationAssembly::LGND_200_CalibrationAssembly(G4String fTheName, G4String serialNumber) :
+  LGND_Assembly(fTheName, serialNumber, "Calibration")
 {
 	fSourceNumber = 0;
 	fSourcePosition = new G4ThreeVector(0,0,0);
@@ -92,6 +91,7 @@ void LGND_200_CalibrationAssembly::Place(G4ThreeVector* assemPosition,
 
  	G4double radius;
 	G4double angle;
+  // deg = pi/180.  
 	if(fSourceNumber){
 		switch(fSourceNumber){
 			//case 1-6 for 19string design
@@ -184,8 +184,7 @@ void LGND_200_CalibrationAssembly::Place(G4ThreeVector* assemPosition,
 		fSourcePosition->setX(radius*sin(angle));
 		fSourcePosition->setY(radius*cos(angle));
 
-		
-		MGLog(routine) << "--> Calibration Source " << fSourceNumber << " used" << endlog;
+		MGLog(routine) << "--> Calibration Source " << fSourceNumber << " radius " << radius << " angle " << angle/deg << " deg "  << endlog;
 		MGLog(routine) << "--> Position X = " << fSourcePosition->x()/CLHEP::mm << " mm "  << endlog;
 		MGLog(routine) << "--> Position Y = " << fSourcePosition->y()/CLHEP::mm << " mm "  << endlog;
 		MGLog(routine) << "--> Position Z = " << fSourcePosition->z()/CLHEP::mm << " mm "  << endlog;
@@ -196,6 +195,7 @@ void LGND_200_CalibrationAssembly::Place(G4ThreeVector* assemPosition,
 		LGND_200_CalibrationTaAbsorberlocalPos->setX(fSourcePosition->x());
 		LGND_200_CalibrationTaAbsorberlocalPos->setY(fSourcePosition->y());
 		LGND_200_CalibrationTaAbsorberlocalPos->setZ(fSourcePosition->z()-35.1*mm);
+    MGLog(debugging) << "\t CalibrationTaAbsorberlocalPos- " << endlog;
 		MGLog(debugging) << "--> Position X = " << LGND_200_CalibrationTaAbsorberlocalPos->x()/CLHEP::mm << " mm "  << endlog;
 		MGLog(debugging) << "--> Position Y = " << LGND_200_CalibrationTaAbsorberlocalPos->y()/CLHEP::mm << " mm "  << endlog;
 		MGLog(debugging) << "--> Position Z = " << LGND_200_CalibrationTaAbsorberlocalPos->z()/CLHEP::mm << " mm "  << endlog;
@@ -216,6 +216,7 @@ void LGND_200_CalibrationAssembly::Place(G4ThreeVector* assemPosition,
 		LGND_200_CalibrationSourceInnerlocalPos->setX(fSourcePosition->x());
 		LGND_200_CalibrationSourceInnerlocalPos->setY(fSourcePosition->y());
 		LGND_200_CalibrationSourceInnerlocalPos->setZ(fSourcePosition->z());
+    MGLog(debugging) << "\t CalibrationInnerlocalPos- " << endlog;
 		MGLog(debugging) << "--> Position X = " << LGND_200_CalibrationSourceInnerlocalPos->x()/CLHEP::mm << " mm "  << endlog;
 		MGLog(debugging) << "--> Position Y = " << LGND_200_CalibrationSourceInnerlocalPos->y()/CLHEP::mm << " mm "  << endlog;
 		MGLog(debugging) << "--> Position Z = " << LGND_200_CalibrationSourceInnerlocalPos->z()/CLHEP::mm << " mm "  << endlog;
@@ -235,6 +236,7 @@ void LGND_200_CalibrationAssembly::Place(G4ThreeVector* assemPosition,
 		LGND_200_CalibrationSourceOuterlocalPos->setX(fSourcePosition->x());
 		LGND_200_CalibrationSourceOuterlocalPos->setY(fSourcePosition->y());
 		LGND_200_CalibrationSourceOuterlocalPos->setZ(fSourcePosition->z()-4.15*mm);
+    MGLog(debugging) << "\t CalibrationOuterlocalPos- " << endlog;
 		MGLog(debugging) << "--> Position X = " << LGND_200_CalibrationSourceOuterlocalPos->x()/CLHEP::mm << " mm "  << endlog;
 		MGLog(debugging) << "--> Position Y = " << LGND_200_CalibrationSourceOuterlocalPos->y()/CLHEP::mm << " mm "  << endlog;
 		MGLog(debugging) << "--> Position Z = " << LGND_200_CalibrationSourceOuterlocalPos->z()/CLHEP::mm << " mm "  << endlog;
@@ -255,6 +257,7 @@ void LGND_200_CalibrationAssembly::Place(G4ThreeVector* assemPosition,
 			LGND_200_CalibrationCuAbsorberlocalPos->setX(fSourcePosition->x());
 			LGND_200_CalibrationCuAbsorberlocalPos->setY(fSourcePosition->y());
 			LGND_200_CalibrationCuAbsorberlocalPos->setZ(fSourcePosition->z()+1.65*mm);
+      MGLog(debugging) << "\t CuAbsorberlocalPos- " << endlog;
 			MGLog(debugging) << "--> Position X = " << LGND_200_CalibrationCuAbsorberlocalPos->x()/CLHEP::mm << " mm "  << endlog;
 			MGLog(debugging) << "--> Position Y = " << LGND_200_CalibrationCuAbsorberlocalPos->y()/CLHEP::mm << " mm "  << endlog;
 			MGLog(debugging) << "--> Position Z = " << LGND_200_CalibrationCuAbsorberlocalPos->z()/CLHEP::mm << " mm "  << endlog;

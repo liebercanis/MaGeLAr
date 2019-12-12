@@ -44,7 +44,6 @@
 #include "G4IonTable.hh"
 #include "TTree.h"
 
-#include "io/MGLogger.hh"
 #include "MGTMCEventHeader.hh"
 #include "MGTMCEventSteps.hh"
 #include "io/MGOutputMCRunMessenger.hh"
@@ -56,7 +55,7 @@
 
 #include "MGTMCStepData.hh"
 
-#include "TROOT.h"'
+#include "TROOT.h"
 //#include "CLHEP/Utility/defs.h"
 #ifndef PACKAGE_VERSION
 #define PACKAGE_VERSION "G4CLHEP"
@@ -101,9 +100,8 @@ MGOutputMCRun::MGOutputMCRun(G4bool isMother) :
   fMCRun = new MGTMCRun();
   fSensitiveIDOfPhysicalVol.clear();
   fSensitiveIDLabelScheme = kClassic;
-  lArEvent.Energy=0;
-  lArEvent.PE=0; 
-
+  lArEventZero();
+  
   //get lar map files
   TString mapDir = TString(std::getenv("MAGEDIR")) + TString("/ana/");
   TString mapFileName("OpticalMapL200.14String.5mm");
@@ -145,10 +143,13 @@ void MGOutputMCRun::BeginOfEventAction(const G4Event *event)
   // "ForProcessing" status is not so useful.  The other option is to use the
   // ForProcessing status and set the primary event by hand from the stored
   // primary event info.
-
+  //
+  firstDecay=true;
   string randNumberStatus = (fWriteRandGenState) ? event->GetRandomNumberStatus() : "";
 
   int eventID = event->GetEventID();
+  lArEventZero();
+  lArEvent.ev = event->GetEventID();
 
   fMCEventHeader->SetEventHeader(eventID, randNumberStatus);
 
@@ -157,14 +158,14 @@ void MGOutputMCRun::BeginOfEventAction(const G4Event *event)
 
   fMCEventSteps->SetEventID( eventID );
   fMCEventPrimaries->SetEventID( eventID );
-  lArEvent.Energy=0;
-  lArEvent.PE=0; 
+    
 
   MGLog(debugging) << "Start of event " << eventID << endl; 
 
 
   // Store primary information
-  int iTrackCounter = 1;
+  int iTrackCounter = 0;
+
 
   G4Navigator* navigator =
   G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking();
@@ -180,22 +181,27 @@ void MGOutputMCRun::BeginOfEventAction(const G4Event *event)
     for(int iParticle=0; iParticle < primaryVertex->GetNumberOfParticle(); iParticle++) {
 
       G4PrimaryParticle* primaryParticle = primaryVertex->GetPrimary(iParticle);
+      //MGLog(routine) << iParticle << "  "  << endlog; primaryParticle->Print(); 
 
       // FIXME: need to also check particle table and then check for
       // daughters if PID = 0; see event/src/G4PrimaryTransformer.cc
       int particleID = GetMaGeParticleID(primaryParticle->GetG4code());
+      
 
       if(primaryParticle->GetDaughter() != NULL) {
         MGLog(warning) << "Primary particle had daughters: "
         << "track IDs of primary particles will be screwed up!" << endlog;
       }
-      int trackID = iTrackCounter;
-      iTrackCounter++;
+      int trackID = ++iTrackCounter;
+      MGLog(routine) << "***** Primary  " << iParticle << " ID  " << particleID 
+        <<  " track ID " << trackID 
+        <<  " primary track ID " << primaryParticle->GetTrackID() 
+        << " primary code " << primaryParticle->GetPDGcode() 
+        << endlog;
 
       G4ThreeVector momentum = primaryParticle->GetMomentum();
 
-      navigator->LocateGlobalPointAndUpdateTouchableHandle( position, momentum,
-      touchable, false); 
+      navigator->LocateGlobalPointAndUpdateTouchableHandle( position, momentum,touchable, false); 
 
       G4ThreeVector localPosition;
       string physVolName;
@@ -215,6 +221,10 @@ void MGOutputMCRun::BeginOfEventAction(const G4Event *event)
 
       double mass = primaryParticle->GetMass();
       double kineticE = sqrt(momentum.mag2() + mass*mass) - mass;
+      lArEvent.PVx=position.x(); 
+      lArEvent.PVy=position.y(); 
+      lArEvent.PVz=position.z(); 
+      
 
       fMCEventPrimaries->AddStep(
                  false, 
@@ -437,7 +447,7 @@ void MGOutputMCRun::BeginOfRunAction()
     fSensitiveIDOfPhysicalVol[physicalVolume] = sensVolID;
     if(sensVolID != 0) {
       fMCRun->SetSensitiveIDOfVolumeName( volName, sensVolID );
-      MGLog(routine) << "Added sensitive volume " << volName 
+      MGLog(debugging) << "Added sensitive volume " << volName 
                      << " with ID " << sensVolID << endlog;
     }
   } // increment physical volume pointer
@@ -506,17 +516,19 @@ void MGOutputMCRun::DefineSchema()
   } else MGLog(warning) << "Schema already defined." << endlog;
 
   if(fATree == NULL) {
-    fATree = new TTree("ATree"," liquid argon veto ");
-    fATree->Branch("lArEvent",&lArEvent,"energy/D:PE/D:x/D:y/D:z/D");
-    MGLog(routine) << " ATree created " << endlog;    
+    fATree = new TTree("fATree"," liquid argon veto ");
+    fATree->Branch("lArEvent",&lArEvent,"edep/D:PE/D:pvx/D:pvy/D:pvz/D:e0/D:x0/D:y0/D:z0/D:xf/D:yf/D:zf/D:ev/I:id/I");
+    MGLog(routine) << " fATree created " << endlog;
+    fATree->Print();
   }
 
 }
 
 //---------------------------------------------------------------------------//
 
-void MGOutputMCRun::EndOfEventAction(const G4Event*)
+void MGOutputMCRun::EndOfEventAction(const G4Event* )
 {
+  printlArEvent();
   WriteEvent();
   fOffsetTime = 0.0;
 }
@@ -537,7 +549,8 @@ void MGOutputMCRun::EndOfRunAction()
    TNamed nevents("NumberOfEvents",to_string(fNevents));
    nevents.Write();
 
-  WriteEvent();
+   // this would add empty event M.Gold 
+  //WriteEvent();
   if(IsMother()) {
     CloseFile();
     SetSchemaDefined(false);
@@ -548,82 +561,100 @@ void MGOutputMCRun::EndOfRunAction()
 
 void MGOutputMCRun::RootSteppingAction(const G4Step* step)
 {
+
   G4Track* track = step->GetTrack();
+
+  const G4VProcess* creatorProcess = track->GetCreatorProcess();
+  G4String processName("none");
+  if(creatorProcess) processName=creatorProcess->GetProcessName();
   G4VPhysicalVolume* physicalVolume = track->GetVolume();
+  string physVolName = physicalVolume->GetName();
+
+  //Radioactive decay products
+  //if (processName == "RadioactiveDecay") 
 
   int sensVolID = fSensitiveIDOfPhysicalVol[physicalVolume];
   double eDep = step->GetTotalEnergyDeposit();
+
+  int pid = GetMaGeParticleID(track->GetDefinition());
+  int trackID = track->GetTrackID();
+  int parentTrackID = track->GetParentID();
+  int copyNo = 0; // FIXME
+  double stepLength = step->GetStepLength();
+  double totalTrackLength = track->GetTrackLength();
+  int stepIndex = fMCEventSteps->GetNSteps();
+  MGLog(routine) << "***** step particle index " << stepIndex << "  ID  " << pid << " track " << trackID 
+      << " parent " << parentTrackID << " first " << firstDecay  
+      << " process " << processName << "  " << physVolName << endlog;
+
+
+
+  G4StepPoint* preStepPoint = step->GetPreStepPoint();
+
+  // recording position of decay
+  if(processName=="RadioactiveDecay"&&firstDecay) {
+    lArEvent.x0 = preStepPoint->GetPosition().x();
+    lArEvent.y0 = preStepPoint->GetPosition().y();
+    lArEvent.z0 = preStepPoint->GetPosition().z();
+    lArEvent.id = pid;
+    firstDecay=false;
+  }
+
+  // sum all deposited energy 
+  lArEvent.e0 += eDep;
+
   if ( !fWriteAllSteps){
     if(fWriteAllStepsInEventsThatDepositEnergy && eDep == 0) return;
     else if(sensVolID  == 0 || eDep == 0) return;
   }
 
- 
-  int pid = GetMaGeParticleID(track->GetDefinition());
-  int trackID = track->GetTrackID();
-  int parentTrackID = track->GetParentID();
-  string physVolName = physicalVolume->GetName();
-  int copyNo = 0; // FIXME
-  double stepLength = step->GetStepLength();
-  double totalTrackLength = track->GetTrackLength();
-  int stepIndex = fMCEventSteps->GetNSteps();
-
+  // record prestep
   bool recordPreStep = false;
-
   if( stepIndex == 0 ){ 
     recordPreStep = true;
   } else {
-
     const MGTMCStepData* previousStepData = fMCEventSteps->GetStep( stepIndex - 1);
-
     if ( previousStepData != NULL) {
       int prevTrackID = previousStepData->GetTrackID();
       if ( prevTrackID != trackID ) recordPreStep = true;
     } else MGLog(warning) << "previous step doesn't exist!" << endlog;
-
   } 
 
+
   if( recordPreStep ) {
+    double t = preStepPoint->GetGlobalTime();
+    double kineticE = preStepPoint->GetKineticEnergy();
 
-    G4StepPoint* stepPoint = step->GetPreStepPoint();
-
-    double t = stepPoint->GetGlobalTime();
-    double kineticE = stepPoint->GetKineticEnergy();
-
-    const G4VProcess* creatorProcess = track->GetCreatorProcess();
+    //const G4VProcess* creatorProcess = track->GetCreatorProcess();
 
     string procName = (creatorProcess) ?  creatorProcess->GetProcessName() : "";
-
-    G4ThreeVector position = stepPoint->GetPosition();
-            
-    G4ThreeVector momentum = stepPoint->GetMomentum();
-
-    G4ThreeVector localPosition = stepPoint->GetTouchableHandle()->
-    GetHistory()->GetTopTransform().TransformPoint(position);
+    G4ThreeVector position = preStepPoint->GetPosition();
+    G4ThreeVector momentum = preStepPoint->GetMomentum();
+    G4ThreeVector localPosition = preStepPoint->GetTouchableHandle()->GetHistory()->GetTopTransform().TransformPoint(position);
     int iStep = track->GetCurrentStepNumber()-1;
-    double trackWeight = stepPoint->GetWeight();
+    double trackWeight = preStepPoint->GetWeight();
 
     fMCEventSteps->AddStep( 
-      recordPreStep, 
-      pid, 
-      trackID, 
-      parentTrackID, 
-      procName, 
-      physVolName, 
-      copyNo,
-      sensVolID,
-      t, 
-      fOffsetTime,
-      0.0, 
-      kineticE,
-      stepLength,
-      totalTrackLength,
-      position.x(), position.y(), position.z(), 
-      localPosition.x(), localPosition.y(), localPosition.z(), 
-      momentum.x(), momentum.y(), momentum.z(),
-      iStep,
-      trackWeight
-    );
+        recordPreStep, 
+        pid, 
+        trackID, 
+        parentTrackID, 
+        procName, 
+        physVolName, 
+        copyNo,
+        sensVolID,
+        t, 
+        fOffsetTime,
+        0.0, 
+        kineticE,
+        stepLength,
+        totalTrackLength,
+        position.x(), position.y(), position.z(), 
+        localPosition.x(), localPosition.y(), localPosition.z(), 
+        momentum.x(), momentum.y(), momentum.z(),
+        iStep,
+        trackWeight
+        );
 
     recordPreStep = false;
   }
@@ -654,14 +685,18 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
   G4ThreeVector localPosition = step->GetPreStepPoint()->GetTouchableHandle()->GetHistory()->
   GetTopTransform().TransformPoint(position);
 
-  if(physVolName.compare("Detector")==0) {
-    lArEvent.Energy += eDep;
+   
+  if(physVolName.compare("Detector")==0) { // in liquid argon 
+    lArEvent.edep += eDep;
     int bin = hMap->FindBin(position.x(), position.y(), position.z());
     lArEvent.PE += hMap->GetBinContent(bin)*scintYield*SiPMQE;
-    lArEvent.x = position.x();
-    lArEvent.y = position.y();
-    lArEvent.z = position.z();
-     //MGLog(routine) << "LAREVENT " << physVolName << " " << eDep << " sum " << lArEvent.Energy << " pe " <<lArEvent.PE << endlog;
+    lArEvent.xf = position.x();
+    lArEvent.yf = position.y();
+    lArEvent.zf = position.z();
+
+    MGLog(debugging) << "LAREVENT " << fATree->GetEntries() << " " << physVolName 
+      << " " << eDep << " sum " << lArEvent.edep << " pe " <<lArEvent.PE 
+      << "(" << lArEvent.xf << "," << lArEvent.yf << "," << lArEvent.zf << ")" << endlog;
   }
 
   fMCEventSteps->AddStep( 
@@ -692,6 +727,7 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
        (fKillBetas && pid == 11) ||
        (fKillGammas && pid == 22) ||
        (fKillNeutrons && pid == 2112)) {
+      MGLog(routine) << " killing " << pid << endlog;
       step->GetTrack()->SetTrackStatus(fKillTrackAndSecondaries);
     }
     else if(fStopNuclei && pid > 100000000) step->GetTrack()->SetKineticEnergy(0.0);
@@ -711,11 +747,13 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
 
 void MGOutputMCRun::WriteEvent()
 {
-  MGLog(debugging) << "Writing event " <<  fMCEventHeader->GetEventID() << ", " 
-    << fMCEventSteps->GetNSteps() << " steps, " << endlog;
   if ( !fWriteAllSteps && (fMCEventHeader->GetTotalEnergy() == 0) && !fMCEventHeader->GetIsHeartbeatEvent() ) return;
   if(IsMother()) FillTree();
   fATree->Fill();
+  MGLog(debugging) << "Writing event " <<  fMCEventHeader->GetEventID() << ", " 
+    << fMCEventSteps->GetNSteps() << " steps, " 
+    << " fTree has " << fTree->GetEntries() << " fATree has " << fATree->GetEntries() << endlog; 
+  
 }
 
 int MGOutputMCRun::GetMaGeParticleID(G4ParticleDefinition* particle)
@@ -728,6 +766,7 @@ int MGOutputMCRun::GetMaGeParticleID(G4ParticleDefinition* particle)
 
 void MGOutputMCRun::WriteFile()
 {
+  MGLog(routine) << "Writing file fTree has " << fTree->GetEntries() << " fATree has " << fATree->GetEntries() << endlog; 
   MGOutputRoot::WriteFile();
 }
 

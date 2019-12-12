@@ -64,7 +64,6 @@
 
 #include "globals.hh"
 #include "G4ThreeVector.hh"
-#include "G4IonTable.hh"
 
 #include "generators/MGVGenerator.hh"
 
@@ -113,7 +112,6 @@ protected:
   //private  members
 private:
   G4ParticleGun *fParticleGun;
-  G4IonTable *theIonTable;
 
   G4int fZ;
   G4int fA;

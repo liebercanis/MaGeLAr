@@ -87,6 +87,7 @@ void MGOutputRoot::CloseFile()
     fTree = NULL;
     fATree = NULL;
   }
+  MGLog(routine) <<" closed file " << fFileName << endlog;
 }
 
 void MGOutputRoot::WriteFile()
@@ -94,5 +95,6 @@ void MGOutputRoot::WriteFile()
   // Write out root file.  Useful for writing out data during runs.
   if(fTree) fTree->Write(fTree->GetName(),TObject::kOverwrite);
   if(fATree) fATree->Write(fATree->GetName(),TObject::kOverwrite);
+  MGLog(routine) <<" wrote file " << fFileName << endlog;
 }
 

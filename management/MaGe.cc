@@ -64,6 +64,7 @@
 #include "globals.hh"
 #include "G4PhysListFactory.hh"
 #include "G4RunManager.hh"
+#include "G4GeometryManager.hh"
 #include "G4UImanager.hh"
 #include "G4UIsession.hh"
 #include "G4UIterminal.hh"
@@ -249,7 +250,9 @@ int main(int argc, char** argv)
 
   delete visManager;
   delete mjMgmt;
-  delete runManager;
+  if(!G4GeometryManager::GetInstance()->IsGeometryClosed()) delete runManager;
+  else MGLog(warning) << " problem deleting runManger " << endlog;
+  MGLog(routine) << " end MaGe " << endlog;
 
   return 0;
 }
