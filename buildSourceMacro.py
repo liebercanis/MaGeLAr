@@ -8,19 +8,15 @@ import pprint
 
 
 def main(args):
-    if len(args)<2: 
-        print(' enter valid number 1,2,or 3  followd by tag ')
+    if len(args)<3: 
+        print(' enter <source number> <number of events> <tag> ')
         exit(0)
 
-    jobn = int(args[0])     
-    tag = args[1]     
-    if (jobn<1 or jobn>3) :
-        print(' enter valid number 1,2,or 3 ')
-        exit(0)
-
-    jobn = jobn+30
-    macroname = 'TlSource-job%i%s.mac' % (jobn,tag) 
-    outputname = 'TlSource-job%i%s.root' % (jobn,tag)
+    sourceNumber = int(args[0]) 
+    events = int(args[1])
+    tag = args[2]     
+    macroname  = 'TlSource%i-%s.mac' % (sourceNumber,tag) 
+    outputname = 'TlSource%i-%s.root' % (sourceNumber,tag)
     print(macroname,' ',outputname)
     exists = os.path.isfile(macroname)
     if exists:
@@ -38,7 +34,7 @@ def main(args):
     f.write('/MG/geometry/detector LGND_200_14String\n')
     f.write('/MG/L200/RadonShroudRadius 700 mm \n')
     f.write('/MG/L200/CalibrationOn true\n')
-    f.write('/MG/L200/CalibrationSetSourceNumber  %i \n' % jobn)
+    f.write('/MG/L200/CalibrationSetSourceNumber  %i \n' % sourceNumber)
     f.write('/MG/L200/CalibrationSetSourceHeight 500 mm #0 # -500 mm\n')
     f.write('/MG/L200/CalibrationSetAbsorber true \n')
     f.write('/MG/L200/SetSensitiveVolumeArgon true \n')
@@ -51,8 +47,7 @@ def main(args):
     f.write('/MG/generator/LGND200Calibration/setZ 81\n')
     f.write('/MG/generator/LGND200Calibration/setA 208\n')
     f.write('/run/initialize \n')
-    #f.write('/run/beamOn 500000\n')
-    f.write('/run/beamOn 1000\n')
+    f.write('/run/beamOn %i \n' % events)
     f.close()
 
 #print(" yar ",__name__)
