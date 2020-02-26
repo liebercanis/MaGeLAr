@@ -11,7 +11,7 @@
 
 #EXTRA_LINK_DEPENDENCIES += $(PACKAGES)
 
-MGBINDIR = /home/gold/legend/MaGeLAr/bin/Linux-g++
+MGBINDIR = $(MAGEDIR)/bin/Linux-g++
 # here dealing with the circular dependencies.
 # we remove multiple declarations
 MGTARGETDEPSORTED := $(sort $(MGTARGETDEPS))
