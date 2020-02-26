@@ -41,11 +41,29 @@
  *
  */
 
+
+#include "CLHEP/ClhepVersion.h"
+#include "G4Version.hh"
+
+#include "globals.hh"
+#include "G4PhysListFactory.hh"
+#include "G4RunManager.hh"
+#include "G4GeometryManager.hh"
+#include "G4UImanager.hh"
+#include "G4UIsession.hh"
+#include "G4UIterminal.hh"
+#include "G4VisManager.hh"
+#include "G4UItcsh.hh"
+#include "G4VisExecutive.hh"
+
+
 #include "io/MGLogger.hh"
 #include "mjprocessors/MGAnalysisWFGeneration.hh"
 #include "waveform/MGWFGenGaussResponse.hh"
 
-using namespace MGWF;
+//using namespace MGWF;
+using namespace std;
+using namespace CLHEP;
 
 int main(int argc, char *argv[])
 {
@@ -54,9 +72,9 @@ int main(int argc, char *argv[])
   if(argc == 1) {
     MGLog(error) << "No file specified!" << endlog;
   } else {
-    HepDouble preTriggerTime = 10.0*ns, sigma = 10.0*ns, delay = 30.0*ns;
+    G4double preTriggerTime = 10.0*ns, sigma = 10.0*ns, delay = 30.0*ns;
     MGWFGenGaussResponse wfGenGauss(preTriggerTime, sigma, delay);
-    wfGenGauss.SetSegmentationParameters(3, 2, 0.4*cm, 3.1*cm, 7.0*cm, 6.0*cm); // nz, nphi, r_i, r_o, h, well depth
+    //wfGenGauss.SetSegmentationParameters(3, 2, 0.4*cm, 3.1*cm, 7.0*cm, 6.0*cm); // nz, nphi, r_i, r_o, h, well depth
     wfGenGauss.SetWaveformParameters(512, 1.0*GHz); // number of samples, sampling frequency
     MGAnalysisWFGeneration *analysis = new MGAnalysisWFGeneration(&wfGenGauss);
     for(int i = 1; i < argc; i++) {

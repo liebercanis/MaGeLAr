@@ -58,6 +58,7 @@
 
 TTree* MGOutputRoot::fTree = NULL;
 TTree* MGOutputRoot::fATree = NULL;
+TTree* MGOutputRoot::fLTree = NULL;
 TFile* MGOutputRoot::fRootFile = NULL;
 
 MGOutputRoot::MGOutputRoot(G4bool isMother): fIsMother(isMother)
@@ -86,6 +87,7 @@ void MGOutputRoot::CloseFile()
     fRootFile = NULL;
     fTree = NULL;
     fATree = NULL;
+    fLTree = NULL;
   }
   MGLog(routine) <<" closed file " << fFileName << endlog;
 }
@@ -95,6 +97,7 @@ void MGOutputRoot::WriteFile()
   // Write out root file.  Useful for writing out data during runs.
   if(fTree) fTree->Write(fTree->GetName(),TObject::kOverwrite);
   if(fATree) fATree->Write(fATree->GetName(),TObject::kOverwrite);
+  if(fLTree) fLTree->Write(fLTree->GetName(),TObject::kOverwrite);
   MGLog(routine) <<" wrote file " << fFileName << endlog;
 }
 

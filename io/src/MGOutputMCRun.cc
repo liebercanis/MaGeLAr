@@ -43,6 +43,7 @@
 #include "G4StepPoint.hh"
 #include "G4IonTable.hh"
 #include "TTree.h"
+#include "TVector3.h"
 
 #include "MGTMCEventHeader.hh"
 #include "MGTMCEventSteps.hh"
@@ -52,6 +53,7 @@
 #include "io/MGOutputMCRun.hh"
 #include "management/MGManager.hh"
 #include "management/MGManagerDetectorConstruction.hh"
+#include "obj/TGeEvent.hxx"
 
 #include "MGTMCStepData.hh"
 
@@ -101,6 +103,7 @@ MGOutputMCRun::MGOutputMCRun(G4bool isMother) :
   fSensitiveIDOfPhysicalVol.clear();
   fSensitiveIDLabelScheme = kClassic;
   lArEventZero();
+  fLArHit = NULL;
   
   //get lar map files
   TString mapDir = TString(std::getenv("MAGEDIR")) + TString("/ana/");
@@ -150,6 +153,12 @@ void MGOutputMCRun::BeginOfEventAction(const G4Event *event)
   int eventID = event->GetEventID();
   lArEventZero();
   lArEvent.ev = event->GetEventID();
+  // make hit for this event 
+  fLArHit = new TLArHit();
+
+  fGeEvent->clear();
+  fLArEvent->clear();
+  fLArEvent->event = event->GetEventID();
 
   fMCEventHeader->SetEventHeader(eventID, randNumberStatus);
 
@@ -224,6 +233,8 @@ void MGOutputMCRun::BeginOfEventAction(const G4Event *event)
       lArEvent.PVx=position.x(); 
       lArEvent.PVy=position.y(); 
       lArEvent.PVz=position.z(); 
+
+      fLArEvent->primaryVertex.SetXYZ(position.x(),position.y(),position.z());
       
 
       fMCEventPrimaries->AddStep(
@@ -522,6 +533,18 @@ void MGOutputMCRun::DefineSchema()
     fATree->Print();
   }
 
+  if(fLTree == NULL) {
+    fLTree = new TTree("LTree"," Legend Analysis ");
+    fGeEvent = new TGeEvent();
+    fLArEvent = new TLArEvent();
+    fLTree->Branch("GeEvent",&fGeEvent);
+    fLTree->Branch("LArEvent",&fLArEvent);
+    MGLog(routine) << " XXXXXX fLTree created " << endlog;
+    fLTree->Print();
+  }
+
+  
+
 }
 
 //---------------------------------------------------------------------------//
@@ -529,6 +552,7 @@ void MGOutputMCRun::DefineSchema()
 void MGOutputMCRun::EndOfEventAction(const G4Event* )
 {
   //printlArEvent();
+  fLArEvent->hits.push_back(*fLArHit);
   WriteEvent();
   fOffsetTime = 0.0;
 }
@@ -569,6 +593,8 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
   if(creatorProcess) processName=creatorProcess->GetProcessName();
   G4VPhysicalVolume* physicalVolume = track->GetVolume();
   string physVolName = physicalVolume->GetName();
+  if(physVolName.compare("Detector")!=0) MGLog(routine) << " phys volume name " << physVolName << endlog; 
+  
 
   //Radioactive decay products
   //if (processName == "RadioactiveDecay") 
@@ -596,12 +622,15 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
     lArEvent.x0 = preStepPoint->GetPosition().x();
     lArEvent.y0 = preStepPoint->GetPosition().y();
     lArEvent.z0 = preStepPoint->GetPosition().z();
+    fLArHit->posStart.SetXYZ(preStepPoint->GetPosition().x(),preStepPoint->GetPosition().y(),preStepPoint->GetPosition().z());
     lArEvent.id = pid;
+    fLArEvent->pid=pid;
     firstDecay=false;
   }
 
   // sum all deposited energy 
   lArEvent.e0 += eDep;
+  fLArEvent->eLAr += eDep;
 
   if ( !fWriteAllSteps){
     if(fWriteAllStepsInEventsThatDepositEnergy && eDep == 0) return;
@@ -685,14 +714,18 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
   G4ThreeVector localPosition = step->GetPreStepPoint()->GetTouchableHandle()->GetHistory()->
   GetTopTransform().TransformPoint(position);
 
-   
   if(physVolName.compare("Detector")==0) { // in liquid argon 
+
     lArEvent.edep += eDep;
+    fLArHit->edep += eDep;
     int bin = hMap->FindBin(position.x(), position.y(), position.z());
     lArEvent.PE += hMap->GetBinContent(bin)*scintYield*SiPMQE;
+    fLArHit->PE  += hMap->GetBinContent(bin)*scintYield*SiPMQE;
     lArEvent.xf = position.x();
     lArEvent.yf = position.y();
     lArEvent.zf = position.z();
+    // resets on each step till last
+    fLArHit->posEnd.SetXYZ(position.x(),position.y(),position.z());
 
     MGLog(debugging) << "LAREVENT " << fATree->GetEntries() << " " << physVolName 
       << " " << eDep << " sum " << lArEvent.edep << " pe " <<lArEvent.PE 
@@ -733,9 +766,21 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
     else if(fStopNuclei && pid > 100000000) step->GetTrack()->SetKineticEnergy(0.0);
   }
 
+  /* add germanium detector data */
   if( (sensVolID > 0) && (eDep > 0) ){
+    // loop to see if this id exists
+    G4int index = getGeDet(G4int(sensVolID));
+    TGeHit geHit;
+    geHit.eDep = eDep;
+    Double_t hitTime = Double_t(stepPoint->GetGlobalTime());
+    geHit.time = hitTime;
+    TVector3 pLocal(localPosition.x(), localPosition.y(), localPosition.z());
+    geHit.local = pLocal;
+    // insert hit in the map
+    fGeEvent->geDet[index].addHit( hitTime, geHit);
     fMCEventHeader->AddEnergyToDetectorID( sensVolID, eDep);
     fMCEventHeader->AddEnergyToTotalEnergy( eDep );
+    MGLog(routine) << " XXXXX  vol id " << sensVolID << " edep " << eDep << " time " <<  stepPoint->GetGlobalTime() << " ndet"  << fGeEvent->geDet.size() << endlog;
   }
 
   // Kill (anti)neutrinos regardless
@@ -750,10 +795,10 @@ void MGOutputMCRun::WriteEvent()
   if ( !fWriteAllSteps && (fMCEventHeader->GetTotalEnergy() == 0) && !fMCEventHeader->GetIsHeartbeatEvent() ) return;
   if(IsMother()) FillTree();
   fATree->Fill();
-  MGLog(debugging) << "Writing event " <<  fMCEventHeader->GetEventID() << ", " 
+  fLTree->Fill();
+  MGLog(routine) << "XXXXXXX Writing event " <<  fMCEventHeader->GetEventID() << ", " 
     << fMCEventSteps->GetNSteps() << " steps, " 
-    << " fTree has " << fTree->GetEntries() << " fATree has " << fATree->GetEntries() << endlog; 
-  
+    << " fTree has " << fTree->GetEntries() << " fATree has " << fATree->GetEntries() << " fLTree has " << fLTree->GetEntries() << endlog; 
 }
 
 int MGOutputMCRun::GetMaGeParticleID(G4ParticleDefinition* particle)
@@ -766,7 +811,8 @@ int MGOutputMCRun::GetMaGeParticleID(G4ParticleDefinition* particle)
 
 void MGOutputMCRun::WriteFile()
 {
-  MGLog(routine) << "Writing file fTree has " << fTree->GetEntries() << " fATree has " << fATree->GetEntries() << endlog; 
+  MGLog(routine) << "XXXXXX Writing file fTree has " << fTree->GetEntries() << " fATree has " << fATree->GetEntries() 
+    << " fLTree has " << fLTree->GetEntries() << " events "  << "ndet " << fGeEvent->geDet.size() << endlog; 
   MGOutputRoot::WriteFile();
 }
 

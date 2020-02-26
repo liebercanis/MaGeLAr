@@ -35,6 +35,9 @@
 #include "MGTMCEventSteps.hh"
 #include "MGTMCRun.hh"
 #include "G4VPhysicalVolume.hh"
+#include "obj/TGeEvent.hxx"
+#include "obj/TLArEvent.hxx"
+
 
 
 class G4Event;
@@ -175,6 +178,14 @@ public:
   /// Return whether particle is a germanium nucleus.
   static bool MaGeParticleIDIsGeNucleus(int pid);
 
+  // return elemet number in list geDet if exists, otherwise make a new one
+  Int_t getGeDet(Int_t idet) {
+    for(unsigned i=0; i< fGeEvent->geDet.size() ; ++i ) if(fGeEvent->geDet[i].id== idet) return Int_t(i);
+    TGeDet *geDet = new TGeDet(idet);
+    fGeEvent->geDet.push_back(*geDet);
+    return  Int_t(fGeEvent->geDet.size() -1);
+  }
+
   void lArEventZero() {
     lArEvent.ev=0;
     lArEvent.edep=0;
@@ -233,6 +244,10 @@ private:
     int id;
   };
   lArEvent_t lArEvent;
+
+  TGeEvent* fGeEvent;
+  TLArEvent* fLArEvent;
+  TLArHit* fLArHit;
 
 
   // get map files

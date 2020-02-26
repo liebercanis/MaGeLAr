@@ -51,7 +51,7 @@ lArEvent_t lArEvent;
 */
 void printlArEvent() {
     TString mess;
-    mess.Form(" \t ***** lArEvent  **** %llu (%.1f,%.1f,%.1f)",lArEvent.ev,lArEvent.PVx,lArEvent.PVy,lArEvent.PVz);
+    mess.Form(" \t ***** lArEvent  **** %d (%.1f,%.1f,%.1f)",lArEvent.ev,lArEvent.PVx,lArEvent.PVy,lArEvent.PVz);
     cout << mess << endl;
     mess.Form(" \t pid %i e0 %.3f first (%.1f,%.1f,%.1f) last (%.1f,%.1f,%.1f) " ,lArEvent.id,lArEvent.e0,
         lArEvent.x0,lArEvent.y0,lArEvent.z0,lArEvent.xf,lArEvent.yf,lArEvent.zf);
@@ -73,15 +73,16 @@ void decode(int code, int& a, int &s, int & u, int& det) {
 
 int main(int argc, char *argv[])
 {
-  //if(argc<2 ) {
-  //  printf(" enter root file in directory /data2/mgold/MaGe_data/ \n");
-  //  return 1;
- // }
+  if(argc>1 ) {
+    //printf(" enter root file in directory /data2/mgold/MaGe_data/ \n");
+    printf(" takes no args \n");
+    return 1;
+  }
 
   TString inFileName(argv[1]);
   cout << inFileName << endl;
 
-  TRandom * rand = new TRandom();
+  //TRandom * rand = new TRandom();
   gROOT->ProcessLine(".x /home/admin/MGDO/Root/LoadMGDOClasses.C");
   printf(" added MGDO \n");
 
@@ -104,25 +105,17 @@ int main(int argc, char *argv[])
   TChain *fChain=new TChain("fTree");
   TChain *aChain=new TChain("fATree");
   
-  fChain->Add("/data2/mgold/MaGe_data/TlSource-job31test.root");
-  aChain->Add("/data2/mgold/MaGe_data/TlSource-job31test.root");
-  
-
-  /*
-  fChain->Add("/data2/mgold/MaGe_data/TlSource-job31.root");
-  aChain->Add("/data2/mgold/MaGe_data/TlSource-job31.root");
-  printf(" fTree %llu ATree %llu \n", fChain->GetEntries(),aChain->GetEntries());
-  fChain->Add("/data2/mgold/MaGe_data/TlSource-job32.root");
-  aChain->Add("/data2/mgold/MaGe_data/TlSource-job32.root");
-  printf(" fTree %llu ATree %llu \n", fChain->GetEntries(),aChain->GetEntries());
-  fChain->Add("/data2/mgold/MaGe_data/TlSource-job33.root");
-  aChain->Add("/data2/mgold/MaGe_data/TlSource-job33.root");
-  */
+  fChain->Add("/data2/mgold/MaGe_data/TlSource31-18-12-2019.root");
+  aChain->Add("/data2/mgold/MaGe_data/TlSource31-18-12-2019.root");
+  fChain->Add("/data2/mgold/MaGe_data/TlSource32-18-12-2019.root");
+  aChain->Add("/data2/mgold/MaGe_data/TlSource32-18-12-2019.root");
+  fChain->Add("/data2/mgold/MaGe_data/TlSource33-18-12-2019.root");
+  aChain->Add("/data2/mgold/MaGe_data/TlSource33-18-12-2019.root");
   printf(" fTree %llu ATree %llu \n", fChain->GetEntries(),aChain->GetEntries());
   //MGDO classes
   MGTMCEventSteps *eventSteps = NULL;
   MGTMCEventHeader *eventHeader = NULL;
-  MGTMCStepData *step = NULL;
+  //MGTMCStepData *step = NULL;
   fChain->SetBranchAddress("eventSteps", &eventSteps);
   fChain->SetBranchAddress("eventHeader",&eventHeader);
   aChain->SetBranchAddress("lArEvent",&lArEvent);
@@ -141,9 +134,9 @@ int main(int argc, char *argv[])
 
     std::map<int,double> emap = eventHeader->GetEnergyMap();
     //if( lArEvent.id!=11) printf(" NOT e- entry %llu energy %f pe %f ID %i \n",entry,lArEvent.edep,lArEvent.PE,int(lArEvent.id));
-    if(entry%1==0) {
+    if(entry%1000==0) {
       //printf(" ... event %llu map size %lu \n",entry,emap.size());
-      printf(" ... event %llu zf %f \n",entry,lArEvent.zf);
+      printf(" ... event %llu \n",entry);
       printlArEvent();
       //unsigned idcount=0;
       //for (std::map<int,double>::iterator idIter=emap.begin() ; idIter!=emap.end(); ++idIter)
@@ -162,7 +155,7 @@ int main(int argc, char *argv[])
           eGe += idIter->second;
           hEnergy[idet]->Fill(idIter->second);
           hEventEnergy->Fill(idIter->second);
-          if(lArEvent.PE<500) hEventEnergyCut->Fill(idIter->second); 
+          if(lArEvent.PE<1) hEventEnergyCut->Fill(idIter->second); 
         }
         else 
           printf(" ERROR!! illegal idet %i \n",idet);
