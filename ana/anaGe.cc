@@ -37,10 +37,10 @@ void decode(int code, int& a, int &s, int & u, int& det) {
 
 int main(int argc, char *argv[])
 {
+  Long64_t maxLoop = 0;
   if(argc>1 ) {
-    //printf(" enter root file in directory /data2/mgold/MaGe_data/ \n");
-    printf(" takes no args \n");
-    return 1;
+    maxLoop = Long64_t(atoi(argv[1]));
+    printf(" maxLoop = %llu \n",maxLoop);
   }
 
   TString inFileName(argv[1]);
@@ -53,28 +53,40 @@ int main(int argc, char *argv[])
 //  TString sysDir = "/data2/mgold/MaGe_data/";
 //  TFile* inputfile = new TFile(sysDir+inFileName,"READONLY");
 
+
+  //std::vector(TH1D*) hWave;
   
   TFile* outputFile = new TFile( Form("anaGe-%s","TlSource.root") ,"RECREATE");
   TH1D *hEnergy[NDET];
   TH1D *hEventEnergy = new TH1D("EventEnergy","Event Energy",2000,0,6);
+  TH1D *hEventHeaderEnergy = new TH1D("EventHeaderEnergy","Event Energy",2000,0,6);
   TH1D *hEventEnergyCut = new TH1D("EventEnergyCut","Event Energy cut ",2000,0,6);
   TH2I *hOcc = new TH2I("Occ","occupancy",20,0,20,10,0,10);
   TH1D *hEnergyLAr = new TH1D("EnergyLAr","Energy in LAr",2000,0,6);
-  TNtuple *ntEvent = new TNtuple("ntEvent"," event variables ","ev:ege:elar:npe");
-  TNtuple *ntGe = new TNtuple("ntGe"," ge hit variables ","ev:ihit:time:edep:x:y:z");
+  TNtuple *ntEvent = new TNtuple("ntEvent"," event variables ","ev:ege:elar:npe:dist");
+  TNtuple *ntGe = new TNtuple("ntGe"," ge hit variables ","ev:idet:ihit:time:edep:x:y:rho:z");
   hOcc->SetXTitle("string");
   hOcc->SetYTitle("unit");
   for(unsigned ih=0; ih<NDET; ++ih) {
     hEnergy[ih]= new TH1D(Form("Energy-det%u",ih),Form("Event Energy det %u",ih),2000,0,6);
   }
   TChain *fChain=new TChain("LTree");
-  
-  fChain->Add("data/TlSource-test31.root");
+  fChain->Add("data/TlSource31-18-12-2019.root");
+  fChain->Add("data/TlSource32-18-12-2019.root");
+  fChain->Add("data/TlSource33-18-12-2019.root");
   printf(" LTree %llu \n", fChain->GetEntries());
+  
+  //
+  TChain *fTree =new TChain("fTree");
+  fTree->Add("data/TlSource31-18-12-2019.root");
+  fTree->Add("data/TlSource32-18-12-2019.root");
+  fTree->Add("data/TlSource33-18-12-2019.root");
+  
   //MGDO classes
-  MGTMCEventSteps *eventSteps = NULL;
-  MGTMCEventHeader *eventHeader = NULL;
+  //MGTMCEventSteps *eventSteps = NULL;
+  MGTMCEventHeader *eventHeader = new MGTMCEventHeader();
   //MGTMCStepData *step = NULL;
+  fTree->SetBranchAddress("eventHeader",&eventHeader);
   // Legend Tree
   TLArEvent *larEvent;
   TGeEvent *geEvent;
@@ -84,35 +96,54 @@ int main(int argc, char *argv[])
     printf(" %llu is not = %llu \n ",fChain->GetEntries(),fChain->GetEntries());
     return 1;
   }
-  printf(" fTree %llu ATree %llu ", fChain->GetEntries(),fChain->GetEntries());
-  fChain->Print();
+  printf(" fTree %llu ATree %llu ", fTree->GetEntries(),fChain->GetEntries());
+  //fChain->Print();
   
-  std::map<double, TGeHit>::iterator gIter;
   Long64_t nentries = fChain->GetEntries();
-  for(Long64_t entry=0 ; entry<nentries; ++entry) {
+  if(maxLoop == 0) maxLoop = nentries;
+  printf(" maxLoop = %llu \n",maxLoop);
+  Int_t ireport = maxLoop/100;
+  Int_t jreport=0;
+  for(Long64_t entry=0 ; entry<maxLoop; ++entry) {
     fChain->GetEntry(entry);  
+    fTree->GetEntry(entry); 
+    hEventHeaderEnergy->Fill(eventHeader->GetTotalEnergy());
     hEnergyLAr->Fill(larEvent->eLAr);
-    if(entry%1==0) printf(" ... event %llu geDets %lu larHits %lu \n",entry, geEvent->geDet.size(),larEvent->hits.size());
+    long unsigned geHits0 =0;
+    int geId=0;
+    if(geEvent->geDet.size()>0) {
+      geHits0  = geEvent->geDet[0].hitList.size();
+      geId     = geEvent->geDet[0].id;
+    }
+    if(entry%ireport==0) printf(" ... %i event %llu geDets %lu id= %i geHits %lu larHits %lu \n",
+        ++jreport,entry, geEvent->geDet.size(),geId,geHits0,larEvent->hits.size());
 
     // loop over ge dets
-    double eGe=0;
     for(unsigned idet =0; idet < geEvent->geDet.size(); ++idet) {
       TGeDet *gdet = &geEvent->geDet[idet];
-      printf(" \t idet %u hits %lu \n",idet,gdet->hitList.size());
-      gIter=gdet->hitList.begin();
+      //printf(" \t idet %u hits %lu \n",idet,gdet->hitList.size());
       unsigned icount=0;
+      double eGe=0;
       for(std::map<double, TGeHit>::iterator gIter= gdet->hitList.begin(); gIter!= gdet->hitList.end(); ++gIter ) {
         TGeHit *ghit = &gIter->second;
         Double_t edep =  ghit->eDep;  
         Double_t time = ghit->time;
         TVector3 local = ghit->local;
-        printf(" \t\t idet %u ihit %u  edep %E time %E \n",idet,icount++,edep,time);
+        //printf(" \t\t idet %u ihit %u  edep %E time %E \n",idet,icount++,edep,time);
         eGe += edep;
-        hEventEnergy->Fill(eGe);
-        ntGe->Fill(float(entry),float(icount),time,edep,local.X(),local.Y(),local.Z());
+        ntGe->Fill(float(entry),float(gdet->id),float(icount),time,edep,local.X(),local.Y(),local.Perp(),local.Z());
       }
     }
-    if(larEvent->hits.size()>0) ntEvent->Fill(float(entry),eGe,larEvent->hits[0].edep,larEvent->hits[0].PE);
+
+    double geEventEnergy = geEvent->getEventEnergy();
+    printf(" %f =? %f  \n",eventHeader->GetTotalEnergy(),geEventEnergy);
+    
+    hEventEnergy->Fill(geEventEnergy);
+    if(larEvent->hits.size()==0) hEventEnergyCut->Fill(geEventEnergy);
+    if(larEvent->hits.size()>0) {
+      TVector3 diff = larEvent->hits[0].posEnd - larEvent->hits[0].posStart;
+      ntEvent->Fill(float(entry),geEventEnergy,larEvent->hits[0].edep,larEvent->hits[0].PE,diff.Mag());
+    }
   }
 
 

@@ -21,6 +21,16 @@ class TGeDet: public TNamed {
     Int_t id;
     std::map<Double_t,TGeHit>  hitList;
     void addHit(Double_t t, TGeHit h);
+
+    //sensVolID = 1000000 + columnNo*100 + crystalNo encoded in LGND_200_14String.cc
+    void decode(int &column, int &crystal) {
+      Int_t code =id;
+      if(code >= 1000000) code -= 1000000;
+      column = code/100;
+      crystal = (code -column*100);
+    }
+
+
     //
   ClassDef(TGeDet,1)
 };

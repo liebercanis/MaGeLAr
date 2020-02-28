@@ -16,6 +16,12 @@ void TGeDet::clear()
 }
 
 void TGeDet::addHit(Double_t t, TGeHit h) {
+  // if the key already exists, add energy to the existing hit
+  std::map<Double_t,TGeHit>::iterator iter = hitList.find(t);
+  if(iter != hitList.end()) {
+    *(&iter->second.eDep) += h.eDep;
+    return;
+  }
   hitList.insert(std::pair<Double_t,TGeHit>(t,h));
 }
 

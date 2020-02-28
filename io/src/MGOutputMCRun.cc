@@ -780,7 +780,10 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
     fGeEvent->geDet[index].addHit( hitTime, geHit);
     fMCEventHeader->AddEnergyToDetectorID( sensVolID, eDep);
     fMCEventHeader->AddEnergyToTotalEnergy( eDep );
-    MGLog(routine) << " XXXXX  vol id " << sensVolID << " edep " << eDep << " time " <<  stepPoint->GetGlobalTime() << " ndet"  << fGeEvent->geDet.size() << endlog;
+    MGLog(debugging) << " XXXXX  vol id " << sensVolID << " id " << index 
+      << " edep " << eDep << " time " <<  stepPoint->GetGlobalTime() << " ndet "  
+      << fGeEvent->geDet.size() <<  " geEnergy  header " << fMCEventHeader->GetTotalEnergy()
+      << " =?? " << fGeEvent->getEventEnergy() << " hits " << fGeEvent->geDet[index].hitList.size() << endlog;
   }
 
   // Kill (anti)neutrinos regardless
