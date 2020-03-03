@@ -46,6 +46,9 @@ int main(int argc, char *argv[])
   TString inFileName(argv[1]);
   cout << inFileName << endl;
 
+  
+
+
   //TRandom * rand = new TRandom();
   gROOT->ProcessLine(".x /home/admin/MGDO/Root/LoadMGDOClasses.C");
   printf(" added MGDO \n");
@@ -64,7 +67,7 @@ int main(int argc, char *argv[])
   TH2I *hOcc = new TH2I("Occ","occupancy",20,0,20,10,0,10);
   TH1D *hEnergyLAr = new TH1D("EnergyLAr","Energy in LAr",2000,0,6);
   TNtuple *ntEvent = new TNtuple("ntEvent"," event variables ","ev:ege:elar:npe:dist");
-  TNtuple *ntGe = new TNtuple("ntGe"," ge hit variables ","ev:idet:ihit:time:edep:x:y:rho:z");
+  TNtuple *ntGe = new TNtuple("ntGe"," ge hit variables ","ev:idet:ihit:time:edep:x:y:rho:r:tdrift:z");
   hOcc->SetXTitle("string");
   hOcc->SetYTitle("unit");
   for(unsigned ih=0; ih<NDET; ++ih) {
@@ -131,12 +134,13 @@ int main(int argc, char *argv[])
         TVector3 local = ghit->local;
         //printf(" \t\t idet %u ihit %u  edep %E time %E \n",idet,icount++,edep,time);
         eGe += edep;
-        ntGe->Fill(float(entry),float(gdet->id),float(icount),time,edep,local.X(),local.Y(),local.Perp(),local.Z());
+        Double_t tdrift = local.Mag()/.05; // ns
+        ntGe->Fill(float(entry),float(gdet->id),float(icount),time,edep,local.X(),local.Y(),local.Perp(),local.Mag(),tdrift,local.Z());
       }
     }
 
     double geEventEnergy = geEvent->getEventEnergy();
-    printf(" %f =? %f  \n",eventHeader->GetTotalEnergy(),geEventEnergy);
+    //printf(" %f =? %f  \n",eventHeader->GetTotalEnergy(),geEventEnergy);
     
     hEventEnergy->Fill(geEventEnergy);
     if(larEvent->hits.size()==0) hEventEnergyCut->Fill(geEventEnergy);

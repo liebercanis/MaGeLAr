@@ -35,6 +35,7 @@
 #include "MGTMCEventSteps.hh"
 #include "MGTMCRun.hh"
 #include "G4VPhysicalVolume.hh"
+#include "G4Navigator.hh"
 #include "obj/TGeEvent.hxx"
 #include "obj/TLArEvent.hxx"
 
@@ -183,6 +184,7 @@ public:
     for(unsigned i=0; i< fGeEvent->geDet.size() ; ++i ) if(fGeEvent->geDet[i].id== idet) return Int_t(i);
     TGeDet *geDet = new TGeDet(idet);
     fGeEvent->geDet.push_back(*geDet);
+    MGLog(debugging) << " GGGGGG  created new GeDet id = "  << idet << " total # is " << fGeEvent->geDet.size() << endlog; 
     return  Int_t(fGeEvent->geDet.size() -1);
   }
 
@@ -222,6 +224,7 @@ private:
   MGTMCEventSteps   *fMCEventPrimaries;  // MGDO encapsulation of steps
 
   G4bool firstDecay;
+  G4Navigator *navigator; 
 
   /* for LAr
   *** If the address points to more than one numerical variable, 

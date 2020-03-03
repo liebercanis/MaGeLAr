@@ -34,7 +34,6 @@
 #include "G4Step.hh"
 #include "G4Track.hh"
 #include "G4GenericIon.hh"
-#include "G4Navigator.hh"
 #include "G4ParticleDefinition.hh"
 #include "G4TransportationManager.hh"
 #include "G4VProcess.hh"
@@ -44,6 +43,7 @@
 #include "G4IonTable.hh"
 #include "TTree.h"
 #include "TVector3.h"
+#include "TString.h"
 
 #include "MGTMCEventHeader.hh"
 #include "MGTMCEventSteps.hh"
@@ -176,9 +176,7 @@ void MGOutputMCRun::BeginOfEventAction(const G4Event *event)
   int iTrackCounter = 0;
 
 
-  G4Navigator* navigator =
-  G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking();
-
+  navigator = G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking();
   G4TouchableHandle touchable;
 
   for(int iVertex=0; iVertex < event->GetNumberOfPrimaryVertex(); iVertex++) {
@@ -221,13 +219,18 @@ void MGOutputMCRun::BeginOfEventAction(const G4Event *event)
       if( !touchable ) {  
         localPosition = position;
         physVolName = "";
+        MGLog(routine) << " ZZZZZ PV NO TOUCHABLE  " << physVolName 
+         << " position " << position
+         << " local    " << localPosition << endlog;
       } else {
         localPosition = touchable->GetHistory()->GetTopTransform().TransformPoint(position);
         G4VPhysicalVolume* physicalVolume = touchable->GetVolume();
         physVolName = physicalVolume->GetName();
         sensVolID = GetSensitiveIDofPhysicalVolume( physicalVolume );
+        MGLog(routine) << " ZZZZZ  PV " << physVolName << " copy " << touchable->GetCopyNumber() 
+         << " position " << position
+         << " local    " << localPosition << endlog;
       }
-
       double mass = primaryParticle->GetMass();
       double kineticE = sqrt(momentum.mag2() + mass*mass) - mass;
       lArEvent.PVx=position.x(); 
@@ -480,6 +483,7 @@ void MGOutputMCRun::BeginOfRunAction()
   }
 
   if ( fAreSurfaceAreasPrinted ) {
+  //if ( 1 ) {
     cout
       << endl
       << "--------------------------------------------------------------------"
@@ -490,9 +494,10 @@ void MGOutputMCRun::BeginOfRunAction()
       << endl;
     for(size_t i = 0; i < volStore->size(); i++ ) {
       G4VPhysicalVolume* physicalVolume = (*volStore)[i];
-      string volName = physicalVolume->GetName();
-      double surfArea = physicalVolume->GetLogicalVolume()->GetSolid()->GetSurfaceArea()/cm/cm;
-      cout << volName << " | " << surfArea << endl;
+      TString volName = physicalVolume->GetName();
+      double surfArea = physicalVolume->GetLogicalVolume()->GetSolid()->GetSurfaceArea();
+      double volume   = physicalVolume->GetLogicalVolume()->GetSolid()->GetCubicVolume();
+      if(volName.Contains("ActiveDet")) cout << volName << " area  " << surfArea << " vol " << volume  << endl;
     }
     cout
       << "ending surface area dump" << endl
@@ -593,7 +598,8 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
   if(creatorProcess) processName=creatorProcess->GetProcessName();
   G4VPhysicalVolume* physicalVolume = track->GetVolume();
   string physVolName = physicalVolume->GetName();
-  if(physVolName.compare("Detector")!=0) MGLog(routine) << " phys volume name " << physVolName << endlog; 
+  TString tPhysVolName(physVolName.c_str());
+  if(tPhysVolName.Contains("ActiveDet")) MGLog(routine) << " active det phys volume name " << physVolName << endlog; 
   
 
   //Radioactive decay products
@@ -634,7 +640,8 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
 
   if ( !fWriteAllSteps){
     if(fWriteAllStepsInEventsThatDepositEnergy && eDep == 0) return;
-    else if(sensVolID  == 0 || eDep == 0) return;
+    //else if(sensVolID  == 0 || eDep == 0) return;
+    else if(eDep == 0) return;
   }
 
   // record prestep
@@ -705,27 +712,36 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
 
   const G4VProcess* processDefinedStep = stepPoint->GetProcessDefinedStep();
   string procName = (processDefinedStep) ?  processDefinedStep->GetProcessName() : "";
-  G4ThreeVector position = track->GetPosition();
+  
+  G4ThreeVector position = step->GetPreStepPoint()->GetPosition();
+  //G4ThreeVector position = track->GetPosition();
   G4ThreeVector momentum = track->GetMomentum();
   int iStep = track->GetCurrentStepNumber();
 
   // 22 0ct 2010 -- changed to make local coords consistent with physicalVolume,
   // A. Schubert
-  G4ThreeVector localPosition = step->GetPreStepPoint()->GetTouchableHandle()->GetHistory()->
-  GetTopTransform().TransformPoint(position);
+  G4TouchableHandle theTouchable = step->GetPreStepPoint()->GetTouchableHandle();
+  G4ThreeVector localPosition = theTouchable->GetHistory()->GetTopTransform().TransformPoint(position);
+  
+   MGLog(debugging) << " YYYYY  " << physVolName << " copy " << theTouchable->GetCopyNumber() 
+    << " position " << position 
+    << " local    " << localPosition <<  endlog;
 
-  if(physVolName.compare("Detector")==0) { // in liquid argon 
+  if(physVolName.compare("Detector")==0) { // in liquid argon compare equal 
 
     lArEvent.edep += eDep;
     fLArHit->edep += eDep;
     int bin = hMap->FindBin(position.x(), position.y(), position.z());
     lArEvent.PE += hMap->GetBinContent(bin)*scintYield*SiPMQE;
     fLArHit->PE  += hMap->GetBinContent(bin)*scintYield*SiPMQE;
-    lArEvent.xf = position.x();
-    lArEvent.yf = position.y();
-    lArEvent.zf = position.z();
+    lArEvent.xf = preStepPoint->GetPosition().x();
+    lArEvent.yf = preStepPoint->GetPosition().y();
+    lArEvent.zf = preStepPoint->GetPosition().z();
     // resets on each step till last
     fLArHit->posEnd.SetXYZ(position.x(),position.y(),position.z());
+    MGLog(debugging) << " YYYYY LAREVENT " << physVolName << " vol id " << sensVolID 
+     << " position " << position 
+     << " local    " << localPosition << endlog;
 
     MGLog(debugging) << "LAREVENT " << fATree->GetEntries() << " " << physVolName 
       << " " << eDep << " sum " << lArEvent.edep << " pe " <<lArEvent.PE 
@@ -767,7 +783,7 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
   }
 
   /* add germanium detector data */
-  if( (sensVolID > 0) && (eDep > 0) ){
+  if( tPhysVolName.Contains("DetUnit") && (eDep > 0) ){
     // loop to see if this id exists
     G4int index = getGeDet(G4int(sensVolID));
     TGeHit geHit;
@@ -775,15 +791,16 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
     Double_t hitTime = Double_t(stepPoint->GetGlobalTime());
     geHit.time = hitTime;
     TVector3 pLocal(localPosition.x(), localPosition.y(), localPosition.z());
+    TVector3 pos(position.x(),position.y(),position.z());
+    G4ThreeVector vtrans = physicalVolume->GetLogicalVolume()->GetSolid()->GetPointOnSurface();
     geHit.local = pLocal;
     // insert hit in the map
     fGeEvent->geDet[index].addHit( hitTime, geHit);
     fMCEventHeader->AddEnergyToDetectorID( sensVolID, eDep);
     fMCEventHeader->AddEnergyToTotalEnergy( eDep );
-    MGLog(debugging) << " XXXXX  vol id " << sensVolID << " id " << index 
-      << " edep " << eDep << " time " <<  stepPoint->GetGlobalTime() << " ndet "  
-      << fGeEvent->geDet.size() <<  " geEnergy  header " << fMCEventHeader->GetTotalEnergy()
-      << " =?? " << fGeEvent->getEventEnergy() << " hits " << fGeEvent->geDet[index].hitList.size() << endlog;
+    MGLog(debugging) << " XXXXX  " << physVolName << " vol id " << sensVolID << " id " << index 
+    << " position " << position 
+    << " local    " << localPosition << endlog;
   }
 
   // Kill (anti)neutrinos regardless
