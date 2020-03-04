@@ -25,15 +25,6 @@ enum {NDET=2000};
 using namespace std;
 
 
-//sensVolID = 1000000 + columnNo*100 + crystalNo encoded in LGND_200_14String.cc
-void decode(int code, int& a, int &s, int & u, int& det) {
-  code -= 1000000;
-  a = code/10000;
-  s = (code -a*10000)/100;
-  u = (code -a*10000 -s*100);
-  det = s*100+u;
-}
-
 
 int main(int argc, char *argv[])
 {
@@ -50,8 +41,8 @@ int main(int argc, char *argv[])
 
 
   //TRandom * rand = new TRandom();
-  gROOT->ProcessLine(".x /home/admin/MGDO/Root/LoadMGDOClasses.C");
-  printf(" added MGDO \n");
+  //gROOT->ProcessLine(".x /home/admin/MGDO/Root/LoadMGDOClasses.C");
+  //printf(" added MGDO \n");
 
 //  TString sysDir = "/data2/mgold/MaGe_data/";
 //  TFile* inputfile = new TFile(sysDir+inFileName,"READONLY");
@@ -74,17 +65,24 @@ int main(int argc, char *argv[])
     hEnergy[ih]= new TH1D(Form("Energy-det%u",ih),Form("Event Energy det %u",ih),2000,0,6);
   }
   TChain *fChain=new TChain("LTree");
+  fChain->Add("data/TlSource31-test.root");
+  /*
   fChain->Add("data/TlSource31-18-12-2019.root");
   fChain->Add("data/TlSource32-18-12-2019.root");
   fChain->Add("data/TlSource33-18-12-2019.root");
   printf(" LTree %llu \n", fChain->GetEntries());
+  */
   
   //
   TChain *fTree =new TChain("fTree");
+  fTree->Add("data/TlSource31-test.root");
+  /*
   fTree->Add("data/TlSource31-18-12-2019.root");
   fTree->Add("data/TlSource32-18-12-2019.root");
   fTree->Add("data/TlSource33-18-12-2019.root");
+  */
   
+  printf(" fTree %llu ATree %llu ", fTree->GetEntries(),fChain->GetEntries());
   //MGDO classes
   //MGTMCEventSteps *eventSteps = NULL;
   MGTMCEventHeader *eventHeader = new MGTMCEventHeader();
@@ -99,17 +97,17 @@ int main(int argc, char *argv[])
     printf(" %llu is not = %llu \n ",fChain->GetEntries(),fChain->GetEntries());
     return 1;
   }
-  printf(" fTree %llu ATree %llu ", fTree->GetEntries(),fChain->GetEntries());
   //fChain->Print();
   
   Long64_t nentries = fChain->GetEntries();
   if(maxLoop == 0) maxLoop = nentries;
   printf(" maxLoop = %llu \n",maxLoop);
-  Int_t ireport = maxLoop/100;
-  Int_t jreport=0;
+  Long64_t ireport = 1;
+  if(maxLoop>100) ireport =maxLoop/100;
+  Long64_t jreport=0;
   for(Long64_t entry=0 ; entry<maxLoop; ++entry) {
     fChain->GetEntry(entry);  
-    fTree->GetEntry(entry); 
+    fTree->GetEntry(entry);
     hEventHeaderEnergy->Fill(eventHeader->GetTotalEnergy());
     hEnergyLAr->Fill(larEvent->eLAr);
     long unsigned geHits0 =0;
@@ -118,13 +116,17 @@ int main(int argc, char *argv[])
       geHits0  = geEvent->geDet[0].hitList.size();
       geId     = geEvent->geDet[0].id;
     }
-    if(entry%ireport==0) printf(" ... %i event %llu geDets %lu id= %i geHits %lu larHits %lu \n",
-        ++jreport,entry, geEvent->geDet.size(),geId,geHits0,larEvent->hits.size());
+      
+    if(entry%ireport==0)  printf(" ... %llu event %llu geDets %lu id= %i geHits %lu larHits %lu \n",
+       ++jreport,entry, geEvent->geDet.size(),geId,geHits0,larEvent->hits.size());
+    
 
     // loop over ge dets
     for(unsigned idet =0; idet < geEvent->geDet.size(); ++idet) {
       TGeDet *gdet = &geEvent->geDet[idet];
-      //printf(" \t idet %u hits %lu \n",idet,gdet->hitList.size());
+      Int_t array=0, column=0, unit=0;
+      gdet->decode(array,column,unit);
+      printf(" \t idet %i id %i array %i column %i unit %i  hits %lu \n",idet,gdet->id,array,column,unit,gdet->hitList.size());
       unsigned icount=0;
       double eGe=0;
       for(std::map<double, TGeHit>::iterator gIter= gdet->hitList.begin(); gIter!= gdet->hitList.end(); ++gIter ) {
@@ -132,12 +134,14 @@ int main(int argc, char *argv[])
         Double_t edep =  ghit->eDep;  
         Double_t time = ghit->time;
         TVector3 local = ghit->local;
+
         //printf(" \t\t idet %u ihit %u  edep %E time %E \n",idet,icount++,edep,time);
         eGe += edep;
         Double_t tdrift = local.Mag()/.05; // ns
         ntGe->Fill(float(entry),float(gdet->id),float(icount),time,edep,local.X(),local.Y(),local.Perp(),local.Mag(),tdrift,local.Z());
       }
     }
+
 
     double geEventEnergy = geEvent->getEventEnergy();
     //printf(" %f =? %f  \n",eventHeader->GetTotalEnergy(),geEventEnergy);

@@ -159,6 +159,7 @@ void MGOutputMCRun::BeginOfEventAction(const G4Event *event)
   fGeEvent->clear();
   fLArEvent->clear();
   fLArEvent->event = event->GetEventID();
+  fGeEvent->event  = event->GetEventID();
 
   fMCEventHeader->SetEventHeader(eventID, randNumberStatus);
 
@@ -169,7 +170,7 @@ void MGOutputMCRun::BeginOfEventAction(const G4Event *event)
   fMCEventPrimaries->SetEventID( eventID );
     
 
-  MGLog(debugging) << "Start of event " << eventID << endl; 
+  MGLog(routine) << "XXXXXXX   Start of event " << eventID << endl; 
 
 
   // Store primary information
@@ -219,7 +220,7 @@ void MGOutputMCRun::BeginOfEventAction(const G4Event *event)
       if( !touchable ) {  
         localPosition = position;
         physVolName = "";
-        MGLog(routine) << " ZZZZZ PV NO TOUCHABLE  " << physVolName 
+        MGLog(debugging) << " ZZZZZ PV NO TOUCHABLE  " << physVolName 
          << " position " << position
          << " local    " << localPosition << endlog;
       } else {
@@ -227,7 +228,7 @@ void MGOutputMCRun::BeginOfEventAction(const G4Event *event)
         G4VPhysicalVolume* physicalVolume = touchable->GetVolume();
         physVolName = physicalVolume->GetName();
         sensVolID = GetSensitiveIDofPhysicalVolume( physicalVolume );
-        MGLog(routine) << " ZZZZZ  PV " << physVolName << " copy " << touchable->GetCopyNumber() 
+        MGLog(debugging) << " ZZZZZ  PV " << physVolName << " copy " << touchable->GetCopyNumber() 
          << " position " << position
          << " local    " << localPosition << endlog;
       }
@@ -507,7 +508,6 @@ void MGOutputMCRun::BeginOfRunAction()
 
   fMCRun->Print();
   fMCEventHeader->SetIsHeartbeatEvent(true);
-  WriteEvent();
 }
 
 //---------------------------------------------------------------------------//
@@ -640,8 +640,8 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
 
   if ( !fWriteAllSteps){
     if(fWriteAllStepsInEventsThatDepositEnergy && eDep == 0) return;
-    //else if(sensVolID  == 0 || eDep == 0) return;
-    else if(eDep == 0) return;
+    else if(sensVolID  == 0 || eDep == 0) return;
+    //else if(eDep == 0) return;
   }
 
   // record prestep
@@ -706,6 +706,8 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
   //for Optical Photon detection -N. McFadden
   //physVolName = stepPoint->GetPhysicalVolume()->GetName();
 
+  // Global Time since the event in which the track belongs is created.
+  // Local time (time since the track was created)
   double t = stepPoint->GetGlobalTime();
   double kineticE = stepPoint->GetKineticEnergy();
   double trackWeight = stepPoint->GetWeight();
@@ -783,7 +785,7 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
   }
 
   /* add germanium detector data */
-  if( tPhysVolName.Contains("DetUnit") && (eDep > 0) ){
+  if( tPhysVolName.Contains("DetUnit")&& tPhysVolName.Contains("Active") && (eDep > 0) ){
     // loop to see if this id exists
     G4int index = getGeDet(G4int(sensVolID));
     TGeHit geHit;
@@ -798,13 +800,14 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
     fGeEvent->geDet[index].addHit( hitTime, geHit);
     fMCEventHeader->AddEnergyToDetectorID( sensVolID, eDep);
     fMCEventHeader->AddEnergyToTotalEnergy( eDep );
-    MGLog(debugging) << " XXXXX  " << physVolName << " vol id " << sensVolID << " id " << index 
+    MGLog(routine) << " XXXXX  " << physVolName << " vol id " << sensVolID << " id " << index << " nhits " << fGeEvent->geDet[index].hitList.size()  
     << " position " << position 
     << " local    " << localPosition << endlog;
   }
 
   // Kill (anti)neutrinos regardless
   if(pid == -12 || pid == 12) step->GetTrack()->SetTrackStatus(fKillTrackAndSecondaries);
+
 }
 
 //---------------------------------------------------------------------------//
@@ -813,9 +816,11 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
 void MGOutputMCRun::WriteEvent()
 {
   if ( !fWriteAllSteps && (fMCEventHeader->GetTotalEnergy() == 0) && !fMCEventHeader->GetIsHeartbeatEvent() ) return;
-  if(IsMother()) FillTree();
-  fATree->Fill();
-  fLTree->Fill();
+  if(IsMother()) {
+    FillTree();
+    fATree->Fill();
+    fLTree->Fill();
+  }
   MGLog(routine) << "XXXXXXX Writing event " <<  fMCEventHeader->GetEventID() << ", " 
     << fMCEventSteps->GetNSteps() << " steps, " 
     << " fTree has " << fTree->GetEntries() << " fATree has " << fATree->GetEntries() << " fLTree has " << fLTree->GetEntries() << endlog; 

@@ -12,6 +12,7 @@ TGeDet::~TGeDet(){}
 
 void TGeDet::clear()
 {
+  deltaUnit.Clear();
   hitList.clear();
 }
 

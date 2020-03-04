@@ -19,17 +19,20 @@ class TGeDet: public TNamed {
     void print();
     // data elements
     Int_t id;
+    TVector3 deltaUnit; // unit dx,dy,dz size
     std::map<Double_t,TGeHit>  hitList;
     void addHit(Double_t t, TGeHit h);
-
-    //sensVolID = 1000000 + columnNo*100 + crystalNo encoded in LGND_200_14String.cc
-    void decode(int &column, int &crystal) {
-      Int_t code =id;
-      if(code >= 1000000) code -= 1000000;
-      column = code/100;
-      crystal = (code -column*100);
+    void setDeltaUnit(Double_t dx, Double_t dy, Double_t dz) {
+      deltaUnit.SetXYZ(dx,dy,dz);
     }
-
+    //sensVolID = 1000000 + array*10000 + columnNo*100 + unit=crystalNo encoded in LGND_200_14String.cc
+    void decode(int &a, int &c, int &u) {
+      Int_t code = id;
+      code -= 1000000;
+      a = code/10000;
+      c = (code -a*10000)/100;
+      u = (code -a*10000 -c*100);
+    }
 
     //
   ClassDef(TGeDet,1)
