@@ -20,6 +20,7 @@ class TGeEvent: public TNamed {
     void clear();
     void print(Int_t event);
     Int_t triggerType;
+    Int_t event;
     std::vector<TGeDet> geDet;
 
     Double_t getEventEnergy() {

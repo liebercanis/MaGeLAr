@@ -10,6 +10,7 @@ TGeEvent::TGeEvent(): TNamed("TGeEvent","TGeEvent")
 
 void TGeEvent::clear()
 {
+  event = -1;
   triggerType = -1;
   geDet.clear();
 }
