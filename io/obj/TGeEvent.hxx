@@ -19,10 +19,13 @@ class TGeEvent: public TNamed {
     //		~TGeEvent();
     void clear();
     void print(Int_t event);
+
+    // members
     Int_t triggerType;
     Int_t event;
     std::vector<TGeDet> geDet;
 
+    // inline functions
     Double_t getEventEnergy() {
       Double_t eGe=0;
       for(unsigned idet =0; idet < geDet.size(); ++idet) {

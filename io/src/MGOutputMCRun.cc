@@ -599,7 +599,7 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
   G4VPhysicalVolume* physicalVolume = track->GetVolume();
   string physVolName = physicalVolume->GetName();
   TString tPhysVolName(physVolName.c_str());
-  if(tPhysVolName.Contains("ActiveDet")) MGLog(routine) << " active det phys volume name " << physVolName << endlog; 
+  if(tPhysVolName.Contains("ActiveDet")) MGLog(debugging) << " active det phys volume name " << physVolName << endlog; 
   
 
   //Radioactive decay products
