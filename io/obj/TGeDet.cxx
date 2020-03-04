@@ -12,7 +12,8 @@ TGeDet::~TGeDet(){}
 
 void TGeDet::clear()
 {
-  deltaUnit.Clear();
+  pMin.Clear();
+  pMax.Clear();
   hitList.clear();
 }
 

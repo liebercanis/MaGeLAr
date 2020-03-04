@@ -19,12 +19,17 @@ class TGeDet: public TNamed {
     void print();
     // data elements
     Int_t id;
-    TVector3 deltaUnit; // unit dx,dy,dz size
+    TVector3 pMin; // min bounding
+    TVector3 pMax; // max bounding
     std::map<Double_t,TGeHit>  hitList;
     void addHit(Double_t t, TGeHit h);
-    void setDeltaUnit(Double_t dx, Double_t dy, Double_t dz) {
-      deltaUnit.SetXYZ(dx,dy,dz);
+    void setPmin(Double_t dx, Double_t dy, Double_t dz) {
+      pMin.SetXYZ(dx,dy,dz);
     }
+    void setPmax(Double_t dx, Double_t dy, Double_t dz) {
+      pMax.SetXYZ(dx,dy,dz);
+    }
+    
     //sensVolID = 1000000 + array*10000 + columnNo*100 + unit=crystalNo encoded in LGND_200_14String.cc
     void decode(int &a, int &c, int &u) {
       Int_t code = id;

@@ -170,7 +170,7 @@ void MGOutputMCRun::BeginOfEventAction(const G4Event *event)
   fMCEventPrimaries->SetEventID( eventID );
     
 
-  MGLog(routine) << "XXXXXXX   Start of event " << eventID << endl; 
+  MGLog(debuggin) << "XXXXXXX   Start of event " << eventID << endl; 
 
 
   // Store primary information
@@ -392,7 +392,7 @@ void MGOutputMCRun::BeginOfRunAction()
   // To be added later... for now, get sensitive vols from physical vol names
   G4PhysicalVolumeStore* volStore = G4PhysicalVolumeStore::GetInstance();
   
-  MGLog(routine) << "this geometry has " << volStore->size() << " volumes" << endlog;
+  MGLog(debuggin) << "this geometry has " << volStore->size() << " volumes" << endlog;
 
   for(size_t i = 0; i < volStore->size(); i++ ) {
     G4VPhysicalVolume* physicalVolume = (*volStore)[i];
@@ -786,21 +786,30 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
 
   /* add germanium detector data */
   if( tPhysVolName.Contains("DetUnit")&& tPhysVolName.Contains("Active") && (eDep > 0) ){
-    // loop to see if this id exists
-    G4int index = getGeDet(G4int(sensVolID));
+
+    // get the solid 
+    G4VSolid * theSolid = step->GetPreStepPoint()->GetPhysicalVolume()->GetLogicalVolume()->GetSolid();
+    G4ThreeVector pMin;
+    G4ThreeVector pMax;
+    theSolid->BoundingLimits(pMin,pMax); 
+    //MGLog(routine) << " XXXXXX " << physVolName <<  " vol id " << sensVolID << " pmin " <<  pMin << " pmax " << pMax << endlog;
+    // see if this id exists. if it doesnt create a new one. return index in list
+    G4int index = getGeDet(G4int(sensVolID),pMin,pMax);
+    
+
     TGeHit geHit;
     geHit.eDep = eDep;
     Double_t hitTime = Double_t(stepPoint->GetGlobalTime());
     geHit.time = hitTime;
     TVector3 pLocal(localPosition.x(), localPosition.y(), localPosition.z());
     TVector3 pos(position.x(),position.y(),position.z());
-    G4ThreeVector vtrans = physicalVolume->GetLogicalVolume()->GetSolid()->GetPointOnSurface();
+    //G4ThreeVector vtrans = physicalVolume->GetLogicalVolume()->GetSolid()->GetPointOnSurface();
     geHit.local = pLocal;
     // insert hit in the map
     fGeEvent->geDet[index].addHit( hitTime, geHit);
     fMCEventHeader->AddEnergyToDetectorID( sensVolID, eDep);
     fMCEventHeader->AddEnergyToTotalEnergy( eDep );
-    MGLog(routine) << " XXXXX  " << physVolName << " vol id " << sensVolID << " id " << index << " nhits " << fGeEvent->geDet[index].hitList.size()  
+    MGLog(debugging) << " XXXXX  " << physVolName << " vol id " << sensVolID << " id " << index << " nhits " << fGeEvent->geDet[index].hitList.size()  
     << " position " << position 
     << " local    " << localPosition << endlog;
   }
@@ -821,7 +830,7 @@ void MGOutputMCRun::WriteEvent()
     fATree->Fill();
     fLTree->Fill();
   }
-  MGLog(routine) << "XXXXXXX Writing event " <<  fMCEventHeader->GetEventID() << ", " 
+  MGLog(debugging) << "XXXXXXX Writing event " <<  fMCEventHeader->GetEventID() << ", " 
     << fMCEventSteps->GetNSteps() << " steps, " 
     << " fTree has " << fTree->GetEntries() << " fATree has " << fATree->GetEntries() << " fLTree has " << fLTree->GetEntries() << endlog; 
 }

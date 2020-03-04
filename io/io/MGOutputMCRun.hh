@@ -180,11 +180,15 @@ public:
   static bool MaGeParticleIDIsGeNucleus(int pid);
 
   // return elemet number in list geDet if exists, otherwise make a new one
-  Int_t getGeDet(Int_t idet) {
+  Int_t getGeDet(Int_t idet, G4ThreeVector pmin, G4ThreeVector pmax) {
     for(unsigned i=0; i< fGeEvent->geDet.size() ; ++i ) if(fGeEvent->geDet[i].id== idet) return Int_t(i);
     TGeDet *geDet = new TGeDet(idet);
+    geDet->setPmin(pmin.x(),pmin.y(),pmin.z());
+    geDet->setPmax(pmax.x(),pmax.y(),pmax.z());
     fGeEvent->geDet.push_back(*geDet);
-    MGLog(debugging) << " GGGGGG  created new GeDet id = "  << idet << " total # is " << fGeEvent->geDet.size() << endlog; 
+    TString pminprint(Form( "(%f,%f,%f )",  geDet->pMin.X() , geDet->pMin.Y() , geDet->pMin.Z()) );
+    TString pmaxprint(Form( "(%f,%f,%f )",  geDet->pMax.X() , geDet->pMax.Y() , geDet->pMax.Z()) );
+    MGLog(routine) << " GGGGGG  created new GeDet id = "  << idet << " pmin " << pminprint << " pmax " << pmaxprint << " total # is " << fGeEvent->geDet.size() << endlog; 
     return  Int_t(fGeEvent->geDet.size() -1);
   }
 
