@@ -170,7 +170,7 @@ void MGOutputMCRun::BeginOfEventAction(const G4Event *event)
   fMCEventPrimaries->SetEventID( eventID );
     
 
-  MGLog(debuggin) << "XXXXXXX   Start of event " << eventID << endl; 
+  MGLog(debugging) << "XXXXXXX   Start of event " << eventID << endl; 
 
 
   // Store primary information
@@ -189,7 +189,7 @@ void MGOutputMCRun::BeginOfEventAction(const G4Event *event)
     for(int iParticle=0; iParticle < primaryVertex->GetNumberOfParticle(); iParticle++) {
 
       G4PrimaryParticle* primaryParticle = primaryVertex->GetPrimary(iParticle);
-      //MGLog(routine) << iParticle << "  "  << endlog; primaryParticle->Print(); 
+      //MGLog(debugginroutine) << iParticle << "  "  << endlog; primaryParticle->Print(); 
 
       // FIXME: need to also check particle table and then check for
       // daughters if PID = 0; see event/src/G4PrimaryTransformer.cc
@@ -392,7 +392,7 @@ void MGOutputMCRun::BeginOfRunAction()
   // To be added later... for now, get sensitive vols from physical vol names
   G4PhysicalVolumeStore* volStore = G4PhysicalVolumeStore::GetInstance();
   
-  MGLog(debuggin) << "this geometry has " << volStore->size() << " volumes" << endlog;
+  MGLog(debugging) << "this geometry has " << volStore->size() << " volumes" << endlog;
 
   for(size_t i = 0; i < volStore->size(); i++ ) {
     G4VPhysicalVolume* physicalVolume = (*volStore)[i];
