@@ -21,14 +21,12 @@ class TGeDet: public TNamed {
     Int_t id;
     TVector3 pMin; // min bounding
     TVector3 pMax; // max bounding
+    TVector3 global; // global position
     std::map<Double_t,TGeHit>  hitList;
     void addHit(Double_t t, TGeHit h);
-    void setPmin(Double_t dx, Double_t dy, Double_t dz) {
-      pMin.SetXYZ(dx,dy,dz);
-    }
-    void setPmax(Double_t dx, Double_t dy, Double_t dz) {
-      pMax.SetXYZ(dx,dy,dz);
-    }
+    void setGlobal(Double_t px, Double_t py, Double_t pz) {global.SetXYZ(px,py,pz);}
+    void setPmin(  Double_t px, Double_t py, Double_t pz) {  pMin.SetXYZ(px,py,pz);}
+    void setPmax(  Double_t px, Double_t py, Double_t pz) {  pMax.SetXYZ(px,py,pz); }
     
     //sensVolID = 1000000 + array*10000 + columnNo*100 + unit=crystalNo encoded in LGND_200_14String.cc
     void decode(int &a, int &c, int &u) {

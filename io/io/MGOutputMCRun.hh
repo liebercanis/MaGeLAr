@@ -180,15 +180,22 @@ public:
   static bool MaGeParticleIDIsGeNucleus(int pid);
 
   // return elemet number in list geDet if exists, otherwise make a new one
-  Int_t getGeDet(Int_t idet, G4ThreeVector pmin, G4ThreeVector pmax) {
+  Int_t getGeDet(Int_t idet,  G4VPhysicalVolume* physVol )  {
     for(unsigned i=0; i< fGeEvent->geDet.size() ; ++i ) if(fGeEvent->geDet[i].id== idet) return Int_t(i);
     TGeDet *geDet = new TGeDet(idet);
+    G4ThreeVector trans = physVol->GetTranslation();
+    G4ThreeVector pmin;
+    G4ThreeVector pmax;
+    physVol->GetLogicalVolume()->GetSolid()->BoundingLimits(pmin,pmax); 
+    geDet->setGlobal(trans.x(),trans.y(),trans.z());
     geDet->setPmin(pmin.x(),pmin.y(),pmin.z());
     geDet->setPmax(pmax.x(),pmax.y(),pmax.z());
     fGeEvent->geDet.push_back(*geDet);
+    TString globprint(Form( "(%f,%f,%f )",  geDet->global.X() , geDet->global.Y() , geDet->global.Z()) );
     TString pminprint(Form( "(%f,%f,%f )",  geDet->pMin.X() , geDet->pMin.Y() , geDet->pMin.Z()) );
     TString pmaxprint(Form( "(%f,%f,%f )",  geDet->pMax.X() , geDet->pMax.Y() , geDet->pMax.Z()) );
-    MGLog(routine) << " GGGGGG  created new GeDet id = "  << idet << " pmin " << pminprint << " pmax " << pmaxprint << " total # is " << fGeEvent->geDet.size() << endlog; 
+    MGLog(routine) << " GGGGGG  created new GeDet id = "  << idet 
+      << " global " << globprint << " pmin " << pminprint << " pmax " << pmaxprint << " total # is " << fGeEvent->geDet.size() << endlog; 
     return  Int_t(fGeEvent->geDet.size() -1);
   }
 
@@ -256,6 +263,7 @@ private:
   TLArEvent* fLArEvent;
   TLArHit* fLArHit;
 
+  const double lArHitLenthCut = 20;  
 
   // get map files
   const double SiPMQE = 0.164;

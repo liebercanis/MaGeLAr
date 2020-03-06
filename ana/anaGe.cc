@@ -57,8 +57,9 @@ int main(int argc, char *argv[])
   TH1D *hEventEnergyCut = new TH1D("EventEnergyCut","Event Energy cut ",2000,0,6);
   TH2I *hOcc = new TH2I("Occ","occupancy",20,0,20,10,0,10);
   TH1D *hEnergyLAr = new TH1D("EnergyLAr","Energy in LAr",2000,0,6);
-  TNtuple *ntEvent = new TNtuple("ntEvent"," event variables ","ev:ege:elar:npe:dist");
-  TNtuple *ntGe = new TNtuple("ntGe"," ge hit variables ","ev:idet:ihit:time:edep:x:y:rho:r:tdrift:z");
+  TNtuple *ntEvent = new TNtuple("ntEvent"," event variables ","ev:ege:elar:npe");
+  TNtuple *ntGe = new TNtuple("ntGe"," ge hit variables ","ev:idet:ihit:time:edep:x:y:z:rho:r:tdrift");
+  TNtuple *ntLAr = new TNtuple("ntLAr"," lar hit variables ","ev:ihit:edep:np:x:y:z:diff");
   hOcc->SetXTitle("string");
   hOcc->SetYTitle("unit");
   for(unsigned ih=0; ih<NDET; ++ih) {
@@ -134,11 +135,12 @@ int main(int argc, char *argv[])
         Double_t edep =  ghit->eDep;  
         Double_t time = ghit->time;
         TVector3 local = ghit->local;
+        TVector3 global = gdet->global + local;
 
         //printf(" \t\t idet %u ihit %u  edep %E time %E \n",idet,icount++,edep,time);
         eGe += edep;
         Double_t tdrift = local.Mag()/.05; // ns
-        ntGe->Fill(float(entry),float(gdet->id),float(icount),time,edep,local.X(),local.Y(),local.Perp(),local.Mag(),tdrift,local.Z());
+        ntGe->Fill(float(entry),float(gdet->id),float(icount),time,edep,global.X(),global.Y(),global.Z(),local.Perp(),local.Mag(),tdrift);
       }
     }
 
@@ -148,9 +150,22 @@ int main(int argc, char *argv[])
     
     hEventEnergy->Fill(geEventEnergy);
     if(larEvent->hits.size()==0) hEventEnergyCut->Fill(geEventEnergy);
+    Double_t edepSum=0;
+    Double_t peSum=0;
     if(larEvent->hits.size()>0) {
-      TVector3 diff = larEvent->hits[0].posEnd - larEvent->hits[0].posStart;
-      ntEvent->Fill(float(entry),geEventEnergy,larEvent->hits[0].edep,larEvent->hits[0].PE,diff.Mag());
+      for(unsigned ihit=0; ihit<larEvent->hits.size(); ++ihit) {
+        TVector3 diff = larEvent->hits[ihit].posEnd - larEvent->hits[ihit].posStart;
+        edepSum += larEvent->hits[ihit].edep;
+        peSum += larEvent->hits[ihit].PE;
+        ntLAr->Fill(float(entry),float(ihit), 
+            larEvent->hits[ihit].edep, 
+            larEvent->hits[ihit].PE,
+            larEvent->hits[ihit].posStart.X(),
+            larEvent->hits[ihit].posStart.Y(),
+            larEvent->hits[ihit].posStart.Z(),
+            diff.Mag() );
+      }
+      ntEvent->Fill(float(entry),geEventEnergy,edepSum,peSum);
     }
   }
 

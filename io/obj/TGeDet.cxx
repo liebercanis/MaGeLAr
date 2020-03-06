@@ -14,6 +14,7 @@ void TGeDet::clear()
 {
   pMin.Clear();
   pMax.Clear();
+  global.Clear();
   hitList.clear();
 }
 

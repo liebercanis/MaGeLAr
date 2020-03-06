@@ -748,6 +748,17 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
     MGLog(debugging) << "LAREVENT " << fATree->GetEntries() << " " << physVolName 
       << " " << eDep << " sum " << lArEvent.edep << " pe " <<lArEvent.PE 
       << "(" << lArEvent.xf << "," << lArEvent.yf << "," << lArEvent.zf << ")" << endlog;
+
+    TVector3 hitLengthVector = fLArHit->posEnd - fLArHit->posStart;
+    // check length and if longer than cut, start a new hit
+    if(hitLengthVector.Mag()>lArHitLenthCut) {
+        fLArEvent->hits.push_back(*fLArHit);   
+        delete fLArHit;
+        fLArHit = new TLArHit();
+        fLArHit->posStart.SetXYZ(preStepPoint->GetPosition().x(),preStepPoint->GetPosition().y(),preStepPoint->GetPosition().z());
+        MGLog(routine) << " fLArEvent has " << fLArEvent->hits.size() << " hits " <<endlog;
+    }
+
   }
 
   fMCEventSteps->AddStep( 
@@ -786,17 +797,8 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
 
   /* add germanium detector data */
   if( tPhysVolName.Contains("DetUnit")&& tPhysVolName.Contains("Active") && (eDep > 0) ){
-
-    // get the solid 
-    G4VSolid * theSolid = step->GetPreStepPoint()->GetPhysicalVolume()->GetLogicalVolume()->GetSolid();
-    G4ThreeVector pMin;
-    G4ThreeVector pMax;
-    theSolid->BoundingLimits(pMin,pMax); 
-    //MGLog(routine) << " XXXXXX " << physVolName <<  " vol id " << sensVolID << " pmin " <<  pMin << " pmax " << pMax << endlog;
     // see if this id exists. if it doesnt create a new one. return index in list
-    G4int index = getGeDet(G4int(sensVolID),pMin,pMax);
-    
-
+     G4int index = getGeDet(G4int(sensVolID), step->GetPreStepPoint()->GetPhysicalVolume()); 
     TGeHit geHit;
     geHit.eDep = eDep;
     Double_t hitTime = Double_t(stepPoint->GetGlobalTime());
@@ -809,9 +811,10 @@ void MGOutputMCRun::RootSteppingAction(const G4Step* step)
     fGeEvent->geDet[index].addHit( hitTime, geHit);
     fMCEventHeader->AddEnergyToDetectorID( sensVolID, eDep);
     fMCEventHeader->AddEnergyToTotalEnergy( eDep );
-    MGLog(debugging) << " XXXXX  " << physVolName << " vol id " << sensVolID << " id " << index << " nhits " << fGeEvent->geDet[index].hitList.size()  
-    << " position " << position 
-    << " local    " << localPosition << endlog;
+    MGLog(routine) << " GGGGG  " << physVolName << " vol id " << sensVolID << " index " << index 
+      << " nhits " << fGeEvent->geDet[index].hitList.size()  
+      << " position " << position 
+      << " local    " << localPosition  << endlog;
   }
 
   // Kill (anti)neutrinos regardless
